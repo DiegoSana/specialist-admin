@@ -21,7 +21,16 @@ export default function AdminLayout({
       return
     }
 
-    // Wait for auth check to complete
+    // Check if there's a token first
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
+    
+    // If no token, redirect immediately (don't wait for query)
+    if (!token) {
+      router.push('/admin/login')
+      return
+    }
+
+    // Wait for auth check to complete only if token exists
     if (isLoading) {
       return
     }

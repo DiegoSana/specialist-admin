@@ -28,6 +28,7 @@ export function useAdminAuth() {
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('admin_token'), // Only run if token exists
   })
 
   // Login mutation

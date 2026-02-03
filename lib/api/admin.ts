@@ -47,6 +47,60 @@ export interface User {
   isAdmin: boolean
 }
 
+export interface Request {
+  id: string
+  title: string
+  description: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  clientId: string
+  client?: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+  }
+  assignedProfessionalId?: string
+  assignedCompanyId?: string
+  location?: {
+    address: string
+    city: string
+    state: string
+    zipCode: string
+  }
+  budget?: {
+    min: number
+    max: number
+    currency: string
+  }
+  photos?: string[]
+}
+
+export interface Professional {
+  id: string
+  userId: string
+  status: string
+  tradeId: string
+  trade?: {
+    id: string
+    name: string
+  }
+  user?: User
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Company {
+  id: string
+  userId: string
+  status: string
+  name: string
+  user?: User
+  createdAt: string
+  updatedAt: string
+}
+
 export interface PaginatedResponse<T> {
   data: T[]
   total: number
@@ -130,5 +184,52 @@ export const adminApi = {
     const response = await api.put(`/admin/users/${id}/status`, { status })
     return response.data
   },
-}
 
+  // Requests (using available endpoint - may need admin-specific endpoint later)
+  getRequests: async (page = 1, limit = 10, status?: string) => {
+    let url = `/requests?page=${page}&limit=${limit}`
+    if (status) {
+      url += `&status=${status}`
+    }
+    const response = await api.get<PaginatedResponse<Request>>(url)
+    return response.data
+  },
+
+  getRequestById: async (id: string) => {
+    const response = await api.get<Request>(`/requests/${id}`)
+    return response.data
+  },
+
+  // Professionals
+  getProfessionals: async (page = 1, limit = 10) => {
+    const response = await api.get<PaginatedResponse<Professional>>(
+      `/admin/professionals?page=${page}&limit=${limit}`,
+    )
+    return response.data
+  },
+
+  getProfessionalById: async (id: string) => {
+    const response = await api.get<Professional>(`/admin/professionals/${id}`)
+    return response.data
+  },
+
+  updateProfessionalStatus: async (id: string, status: string) => {
+    const response = await api.put(`/admin/professionals/${id}/status`, {
+      status,
+    })
+    return response.data
+  },
+
+  // Companies
+  getCompanies: async (page = 1, limit = 10) => {
+    const response = await api.get<PaginatedResponse<Company>>(
+      `/admin/companies?page=${page}&limit=${limit}`,
+    )
+    return response.data
+  },
+
+  getCompanyById: async (id: string) => {
+    const response = await api.get<Company>(`/admin/companies/${id}`)
+    return response.data
+  },
+}

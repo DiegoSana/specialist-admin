@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useUsers, useUpdateUserStatus } from '@/hooks/use-users'
 import { User } from '@/lib/api/admin'
 
@@ -135,19 +136,27 @@ export default function UsersPage() {
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <select
-                    value={user.status}
-                    onChange={(e) =>
-                      handleStatusChange(user.id, e.target.value)
-                    }
-                    disabled={updateStatusMutation.isPending}
-                    className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="SUSPENDED">Suspended</option>
-                    <option value="BANNED">Banned</option>
-                  </select>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={user.status}
+                      onChange={(e) =>
+                        handleStatusChange(user.id, e.target.value)
+                      }
+                      disabled={updateStatusMutation.isPending}
+                      className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="SUSPENDED">Suspended</option>
+                      <option value="BANNED">Banned</option>
+                    </select>
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      View
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

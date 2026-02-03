@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
@@ -10,6 +11,13 @@ export function useAdminAuth() {
   const queryClient = useQueryClient()
 
   // Check if user is authenticated and is admin
+  const [hasToken, setHasToken] = useState(false)
+
+  useEffect(() => {
+    // Only check localStorage after mount
+    setHasToken(!!localStorage.getItem('admin_token'))
+  }, [])
+
   const { data: user, isLoading, error } = useQuery({
     queryKey: ['admin', 'me'],
     queryFn: async () => {
@@ -28,7 +36,7 @@ export function useAdminAuth() {
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: typeof window !== 'undefined' && !!localStorage.getItem('admin_token'), // Only run if token exists
+    enabled: hasToken, // Only run if token exists and component is mounted
   })
 
   // Login mutation

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/use-admin-auth'
 import { AdminSidebar } from '@/components/admin/sidebar'
@@ -14,6 +14,12 @@ export default function AdminLayout({
   const router = useRouter()
   const pathname = usePathname()
   const { user, isLoading, isAuthenticated } = useAdminAuth()
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     // Don't redirect if already on login page
@@ -21,8 +27,13 @@ export default function AdminLayout({
       return
     }
 
+    // Only redirect after component is mounted
+    if (!mounted) {
+      return
+    }
+
     // Check if there's a token first
-    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
+    const token = localStorage.getItem('admin_token')
     
     // If no token, redirect immediately (don't wait for query)
     if (!token) {
@@ -39,10 +50,15 @@ export default function AdminLayout({
     if (!isAuthenticated) {
       router.push('/admin/login')
     }
-  }, [isAuthenticated, isLoading, pathname, router])
+  }, [isAuthenticated, isLoading, pathname, router, mounted])
+
+  // Don't render anything until mounted (prevents hydration mismatch)
+  if (!mounted) {
+    return null
+  }
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading && pathname !== '/admin/login') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">

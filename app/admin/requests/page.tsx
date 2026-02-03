@@ -95,14 +95,14 @@ export default function RequestsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {data?.data.length === 0 ? (
+            {!data || !data.data || data.data.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                   No requests found
                 </td>
               </tr>
             ) : (
-              data?.data.map((request: Request) => (
+              data.data.map((request: Request) => (
                 <tr key={request.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">

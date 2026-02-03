@@ -187,12 +187,30 @@ export const adminApi = {
 
   // Requests (using available endpoint - may need admin-specific endpoint later)
   getRequests: async (page = 1, limit = 10, status?: string) => {
-    let url = `/requests?page=${page}&limit=${limit}`
+    // Note: The /requests endpoint returns an array, not paginated
+    // We'll convert it to paginated format for consistency
+    const response = await api.get<Request[]>(`/requests`)
+    let requests = response.data
+
+    // Filter by status if provided
     if (status) {
-      url += `&status=${status}`
+      requests = requests.filter((r) => r.status === status)
     }
-    const response = await api.get<PaginatedResponse<Request>>(url)
-    return response.data
+
+    // Manual pagination
+    const total = requests.length
+    const totalPages = Math.ceil(total / limit)
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedData = requests.slice(startIndex, endIndex)
+
+    return {
+      data: paginatedData,
+      total,
+      page,
+      limit,
+      totalPages,
+    }
   },
 
   getRequestById: async (id: string) => {

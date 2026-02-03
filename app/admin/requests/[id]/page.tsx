@@ -118,32 +118,12 @@ export default function RequestDetailPage({
           )}
 
           {/* Location */}
-          {request.location && (
+          {request.address && (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">
                 Location
               </h2>
-              <div className="space-y-2">
-                <p className="text-gray-900">{request.location.address}</p>
-                <p className="text-gray-600">
-                  {request.location.city}, {request.location.state}{' '}
-                  {request.location.zipCode}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Budget */}
-          {request.budget && (
-            <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">
-                Budget
-              </h2>
-              <p className="text-lg font-semibold text-gray-900">
-                {request.budget.currency} {request.budget.min.toLocaleString()}
-                {request.budget.max &&
-                  ` - ${request.budget.max.toLocaleString()}`}
-              </p>
+              <p className="text-gray-900">{request.address}</p>
             </div>
           )}
 

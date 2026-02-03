@@ -61,20 +61,12 @@ export interface Request {
     lastName: string
     email: string
   }
-  assignedProfessionalId?: string
-  assignedCompanyId?: string
-  location?: {
-    address: string
-    city: string
-    state: string
-    zipCode: string
-  }
-  budget?: {
-    min: number
-    max: number
-    currency: string
-  }
+  address?: string | null
   photos?: string[]
+  trade?: {
+    id: string
+    name: string
+  }
 }
 
 export interface Professional {
@@ -185,31 +177,22 @@ export const adminApi = {
     return response.data
   },
 
-  // Requests (using available endpoint - may need admin-specific endpoint later)
+  // Requests (using admin endpoint)
   getRequests: async (page = 1, limit = 10, status?: string) => {
-    // Note: The /requests endpoint returns an array, not paginated
-    // We'll convert it to paginated format for consistency
-    const response = await api.get<Request[]>(`/requests`)
-    let requests = response.data
-
-    // Filter by status if provided
+    let url = `/admin/requests?page=${page}&limit=${limit}`
     if (status) {
-      requests = requests.filter((r) => r.status === status)
+      url += `&status=${status}`
     }
-
-    // Manual pagination
-    const total = requests.length
-    const totalPages = Math.ceil(total / limit)
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedData = requests.slice(startIndex, endIndex)
-
+    const response = await api.get(url)
+    
+    // Transform backend response format to match our interface
+    const backendData = response.data
     return {
-      data: paginatedData,
-      total,
-      page,
-      limit,
-      totalPages,
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
     }
   },
 

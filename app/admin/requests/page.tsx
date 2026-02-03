@@ -39,7 +39,10 @@ export default function RequestsPage() {
   if (error) {
     return (
       <div className="rounded-lg bg-red-50 p-4 text-red-800">
-        Error loading requests. Please try again.
+        Error loading requests: {error instanceof Error ? error.message : 'Unknown error'}
+        <p className="mt-2 text-sm">
+          Note: Admin users need a client or professional profile to view requests, or an admin-specific endpoint needs to be created.
+        </p>
       </div>
     )
   }
@@ -130,9 +133,7 @@ export default function RequestsPage() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {request.location
-                      ? `${request.location.city}, ${request.location.state}`
-                      : 'N/A'}
+                    {request.address || 'N/A'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {new Date(request.createdAt).toLocaleDateString()}

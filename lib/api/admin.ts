@@ -73,12 +73,35 @@ export interface Professional {
   id: string
   userId: string
   status: string
-  tradeId: string
-  trade?: {
+  bio?: string | null
+  city: string
+  zone?: string | null
+  address?: string | null
+  phone?: string | null
+  whatsapp?: string | null
+  website?: string | null
+  profileImage?: string | null
+  gallery: string[]
+  user?: {
     id: string
-    name: string
+    email: string
+    firstName: string
+    lastName: string
+    phone?: string | null
+    status: string
   }
-  user?: User
+  trades?: Array<{
+    trade: {
+      id: string
+      name: string
+    }
+    isPrimary?: boolean
+  }>
+  serviceProvider?: {
+    id: string
+    averageRating: number | null
+    totalReviews: number
+  }
   createdAt: string
   updatedAt: string
 }
@@ -87,10 +110,35 @@ export interface Company {
   id: string
   userId: string
   status: string
-  name: string
-  user?: User
+  companyName: string
+  name?: string // Alias for companyName
+  taxId?: string | null
+  description?: string | null
+  address?: string | null
+  city?: string | null
+  phone?: string | null
+  website?: string | null
+  user?: {
+    id: string
+    email: string
+    firstName: string | null
+    lastName: string | null
+    phone?: string | null
+    status: string
+  }
+  trades?: Array<{
+    trade: {
+      id: string
+      name: string
+    }
+  }>
+  serviceProvider?: {
+    id: string
+    averageRating: number
+    totalReviews: number
+  }
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 export interface PaginatedResponse<T> {
@@ -102,61 +150,10 @@ export interface PaginatedResponse<T> {
 }
 
 export const adminApi = {
-  // Dashboard stats (we'll calculate from existing endpoints for now)
+  // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    // For now, we'll fetch users and calculate basic stats
-    // In the future, this should be a dedicated endpoint
-    const [usersRes] = await Promise.all([
-      api.get<PaginatedResponse<User>>('/admin/users?limit=1000'),
-    ])
-
-    const users = usersRes.data.data
-    const now = new Date()
-    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-    const newLast7Days = users.filter(
-      (u) => new Date(u.createdAt) >= last7Days,
-    ).length
-    const newLast30Days = users.filter(
-      (u) => new Date(u.createdAt) >= last30Days,
-    ).length
-    const activeLast30Days = users.filter(
-      (u) => u.status === 'ACTIVE' && new Date(u.updatedAt) >= last30Days,
-    ).length
-
-    return {
-      users: {
-        total: usersRes.data.total,
-        newLast7Days,
-        newLast30Days,
-        activeLast30Days,
-      },
-      requests: {
-        total: 0,
-        byStatus: {
-          PENDING: 0,
-          ACCEPTED: 0,
-          IN_PROGRESS: 0,
-          DONE: 0,
-          CANCELLED: 0,
-        },
-        newLast7Days: 0,
-        newLast30Days: 0,
-      },
-      professionals: {
-        total: 0,
-        verified: 0,
-        pending: 0,
-        suspended: 0,
-      },
-      companies: {
-        total: 0,
-        verified: 0,
-        pending: 0,
-        suspended: 0,
-      },
-    }
+    const response = await api.get<DashboardStats>('/admin/dashboard/stats')
+    return response.data
   },
 
   // Users
@@ -203,10 +200,17 @@ export const adminApi = {
 
   // Professionals
   getProfessionals: async (page = 1, limit = 10) => {
-    const response = await api.get<PaginatedResponse<Professional>>(
-      `/admin/professionals?page=${page}&limit=${limit}`,
-    )
-    return response.data
+    const response = await api.get(`/admin/professionals?page=${page}&limit=${limit}`)
+    
+    // Transform backend response format to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
   },
 
   getProfessionalById: async (id: string) => {
@@ -223,14 +227,28 @@ export const adminApi = {
 
   // Companies
   getCompanies: async (page = 1, limit = 10) => {
-    const response = await api.get<PaginatedResponse<Company>>(
-      `/admin/companies?page=${page}&limit=${limit}`,
-    )
-    return response.data
+    const response = await api.get(`/admin/companies?page=${page}&limit=${limit}`)
+    
+    // Transform backend response format to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
   },
 
   getCompanyById: async (id: string) => {
     const response = await api.get<Company>(`/admin/companies/${id}`)
+    return response.data
+  },
+
+  updateCompanyStatus: async (id: string, status: string) => {
+    const response = await api.put(`/admin/companies/${id}/status`, {
+      status,
+    })
     return response.data
   },
 }

@@ -214,7 +214,9 @@ export default function ProfessionalDetailPage({
                 <div>
                   <span className="text-sm text-gray-500">Average Rating:</span>
                   <p className="text-2xl font-bold text-gray-900">
-                    {professional.serviceProvider.averageRating.toFixed(1)}
+                    {professional.serviceProvider.averageRating !== null
+                      ? professional.serviceProvider.averageRating.toFixed(1)
+                      : 'N/A'}
                   </p>
                 </div>
                 <div>

@@ -218,7 +218,10 @@ export default function CompanyDetailPage({
                 <div>
                   <span className="text-sm text-gray-500">Average Rating:</span>
                   <p className="text-2xl font-bold text-gray-900">
-                    {company.serviceProvider.averageRating.toFixed(1)}
+                    {company.serviceProvider.averageRating !== null &&
+                    company.serviceProvider.averageRating !== undefined
+                      ? company.serviceProvider.averageRating.toFixed(1)
+                      : 'N/A'}
                   </p>
                 </div>
                 <div>
@@ -257,4 +260,6 @@ export default function CompanyDetailPage({
     </div>
   )
 }
+
+
 

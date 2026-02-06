@@ -141,24 +141,12 @@ export default function ProfessionalDetailPage({
                 {professional.user?.email}
               </p>
             </div>
-            {professional.user?.phone && (
+            {(professional.user?.phone || professional.whatsapp) && (
               <div>
-                <span className="text-sm text-gray-500">Phone:</span>
+                <span className="text-sm text-gray-500">Phone / WhatsApp:</span>
                 <p className="font-medium text-gray-900">
-                  {professional.user.phone}
+                  {professional.user?.phone || professional.whatsapp}
                 </p>
-              </div>
-            )}
-            {professional.phone && (
-              <div>
-                <span className="text-sm text-gray-500">Professional Phone:</span>
-                <p className="font-medium text-gray-900">{professional.phone}</p>
-              </div>
-            )}
-            {professional.whatsapp && (
-              <div>
-                <span className="text-sm text-gray-500">WhatsApp:</span>
-                <p className="font-medium text-gray-900">{professional.whatsapp}</p>
               </div>
             )}
             {professional.website && (

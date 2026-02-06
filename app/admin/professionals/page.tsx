@@ -38,9 +38,13 @@ export default function ProfessionalsPage() {
     switch (status) {
       case 'ACTIVE':
         return 'bg-green-100 text-green-800'
-      case 'PENDING':
+      case 'VERIFIED':
+        return 'bg-emerald-100 text-emerald-800'
+      case 'PENDING_VERIFICATION':
         return 'bg-yellow-100 text-yellow-800'
       case 'SUSPENDED':
+        return 'bg-red-100 text-red-800'
+      case 'REJECTED':
         return 'bg-red-100 text-red-800'
       case 'INACTIVE':
         return 'bg-gray-100 text-gray-800'
@@ -48,6 +52,15 @@ export default function ProfessionalsPage() {
         return 'bg-gray-100 text-gray-800'
     }
   }
+
+  const professionalStatusOptions = [
+    { value: 'PENDING_VERIFICATION', label: 'Pending verification' },
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'VERIFIED', label: 'Verified' },
+    { value: 'INACTIVE', label: 'Inactive' },
+    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'SUSPENDED', label: 'Suspended' },
+  ]
 
   if (isLoading) {
     return (
@@ -170,10 +183,11 @@ export default function ProfessionalsPage() {
                       disabled={updateStatusMutation.isPending}
                       className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                     >
-                      <option value="ACTIVE">Active</option>
-                      <option value="PENDING">Pending</option>
-                      <option value="SUSPENDED">Suspended</option>
-                      <option value="INACTIVE">Inactive</option>
+                      {professionalStatusOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                     <Link
                       href={`/admin/professionals/${professional.id}`}

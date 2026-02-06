@@ -44,7 +44,10 @@ export interface User {
   updatedAt: string
   hasClientProfile: boolean
   hasProfessionalProfile: boolean
+  hasCompanyProfile?: boolean
   isAdmin: boolean
+  emailVerified?: boolean
+  phoneVerified?: boolean
 }
 
 export interface Request {
@@ -171,6 +174,14 @@ export const adminApi = {
 
   updateUserStatus: async (id: string, status: string) => {
     const response = await api.put(`/admin/users/${id}/status`, { status })
+    return response.data
+  },
+
+  updateUserVerification: async (
+    id: string,
+    data: { emailVerified?: boolean; phoneVerified?: boolean },
+  ) => {
+    const response = await api.put<User>(`/admin/users/${id}/verification`, data)
     return response.data
   },
 

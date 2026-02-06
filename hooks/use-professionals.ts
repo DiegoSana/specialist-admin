@@ -24,8 +24,11 @@ export function useUpdateProfessionalStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.updateProfessionalStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'professionals'] })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'professionals', variables.id],
+      })
     },
   })
 }

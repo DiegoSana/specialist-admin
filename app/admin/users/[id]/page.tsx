@@ -1,9 +1,9 @@
 'use client'
 
 import { use } from 'react'
-import { useUser } from '@/hooks/use-users'
+import { useUser, useUpdateUserVerification } from '@/hooks/use-users'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Check, X } from 'lucide-react'
 
 export default function UserDetailPage({
   params,
@@ -12,6 +12,7 @@ export default function UserDetailPage({
 }) {
   const { id } = use(params)
   const { data: user, isLoading, error } = useUser(id)
+  const updateVerification = useUpdateUserVerification()
 
   if (isLoading) {
     return (
@@ -85,6 +86,103 @@ export default function UserDetailPage({
               <span className="text-sm text-gray-500">User ID:</span>
               <p className="font-mono text-sm text-gray-600">{user.id}</p>
             </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Verification (admin override)
+          </h2>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-700">Email</span>
+                {user.emailVerified === true ? (
+                  <span className="inline-flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                    <Check className="h-3 w-3" /> Verified
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    <X className="h-3 w-3" /> Not verified
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateVerification.mutate({ id, emailVerified: true })
+                  }
+                  disabled={
+                    updateVerification.isPending || user.emailVerified === true
+                  }
+                  className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                >
+                  Mark verified
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateVerification.mutate({ id, emailVerified: false })
+                  }
+                  disabled={
+                    updateVerification.isPending ||
+                    user.emailVerified !== true
+                  }
+                  className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Mark unverified
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-700">Phone</span>
+                {user.phoneVerified === true ? (
+                  <span className="inline-flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                    <Check className="h-3 w-3" /> Verified
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    <X className="h-3 w-3" /> Not verified
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateVerification.mutate({ id, phoneVerified: true })
+                  }
+                  disabled={
+                    updateVerification.isPending || user.phoneVerified === true
+                  }
+                  className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                >
+                  Mark verified
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateVerification.mutate({ id, phoneVerified: false })
+                  }
+                  disabled={
+                    updateVerification.isPending ||
+                    user.phoneVerified !== true
+                  }
+                  className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Mark unverified
+                </button>
+              </div>
+            </div>
+            {updateVerification.isError && (
+              <p className="text-sm text-red-600">
+                Error updating verification. Try again.
+              </p>
+            )}
           </div>
         </div>
 

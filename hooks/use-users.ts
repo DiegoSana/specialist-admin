@@ -30,5 +30,27 @@ export function useUpdateUserStatus() {
   })
 }
 
+export function useUpdateUserVerification() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      emailVerified,
+      phoneVerified,
+    }: {
+      id: string
+      emailVerified?: boolean
+      phoneVerified?: boolean
+    }) => adminApi.updateUserVerification(id, { emailVerified, phoneVerified }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', variables.id],
+      })
+    },
+  })
+}
+
 
 

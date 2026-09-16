@@ -69,11 +69,11 @@ export default function CompanyDetailPage({
   return (
     <div>
       <Link
-        href="/admin/companies"
+        href="/admin/users"
         className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Companies
+        Back to Users
       </Link>
 
       <div className="mb-6 flex items-center justify-between">

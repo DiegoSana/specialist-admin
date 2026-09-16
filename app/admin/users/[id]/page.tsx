@@ -199,6 +199,11 @@ export default function UserDetailPage({
                 Professional Profile
               </span>
             )}
+            {user.hasCompanyProfile && (
+              <span className="inline-block rounded bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+                Company Profile
+              </span>
+            )}
             {user.isAdmin && (
               <span className="inline-block rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
                 Admin
@@ -206,6 +211,7 @@ export default function UserDetailPage({
             )}
             {!user.hasClientProfile &&
               !user.hasProfessionalProfile &&
+              !user.hasCompanyProfile &&
               !user.isAdmin && (
                 <p className="text-sm text-gray-500">No profiles</p>
               )}

@@ -3,7 +3,7 @@
 import { use } from 'react'
 import { useRequest } from '@/hooks/use-requests'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, MessageSquare } from 'lucide-react'
 
 export default function RequestDetailPage({
   params,
@@ -46,6 +46,11 @@ export default function RequestDetailPage({
     }
   }
 
+  const getProviderTypeBadgeColor = (type: 'PROFESSIONAL' | 'COMPANY') =>
+    type === 'COMPANY'
+      ? 'bg-emerald-100 text-emerald-800'
+      : 'bg-purple-100 text-purple-800'
+
   return (
     <div>
       <Link
@@ -56,13 +61,22 @@ export default function RequestDetailPage({
         Back to Requests
       </Link>
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-gray-900">{request.title}</h1>
-        <span
-          className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${getStatusBadgeColor(request.status)}`}
-        >
-          {request.status}
-        </span>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/admin/whatsapp/${request.id}`}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <MessageSquare className="h-4 w-4" />
+            View WhatsApp conversation
+          </Link>
+          <span
+            className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${getStatusBadgeColor(request.status)}`}
+          >
+            {request.status}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -113,6 +127,95 @@ export default function RequestDetailPage({
                   <span className="text-sm text-gray-500">Email:</span>
                   <p className="text-gray-900">{request.client.email}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Provider */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              Provider
+            </h2>
+            {request.provider ? (
+              <div className="space-y-2">
+                <div>
+                  <span className="text-sm text-gray-500">Name:</span>
+                  <p className="font-medium text-gray-900">
+                    {request.provider.name}
+                  </p>
+                </div>
+                <div>
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getProviderTypeBadgeColor(request.provider.type)}`}
+                  >
+                    {request.provider.type === 'COMPANY'
+                      ? 'Company'
+                      : 'Professional'}
+                  </span>
+                </div>
+                {request.provider.trades && request.provider.trades.length > 0 && (
+                  <div>
+                    <span className="text-sm text-gray-500">Trades:</span>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {request.provider.trades.map((trade) => (
+                        <span
+                          key={trade.id}
+                          className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-800"
+                        >
+                          {trade.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No provider assigned yet</p>
+            )}
+          </div>
+
+          {/* Interested providers */}
+          {request.interestedProviders && request.interestedProviders.length > 0 && (
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                Interested providers
+              </h2>
+              <div className="space-y-3">
+                {request.interestedProviders.map((interested) => (
+                  <div
+                    key={interested.id}
+                    className="rounded-md border border-gray-200 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-gray-900">
+                        {interested.provider?.displayName || 'Unknown provider'}
+                      </p>
+                      {interested.provider?.type && (
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getProviderTypeBadgeColor(interested.provider.type)}`}
+                        >
+                          {interested.provider.type === 'COMPANY'
+                            ? 'Company'
+                            : 'Professional'}
+                        </span>
+                      )}
+                    </div>
+                    {interested.provider && (
+                      <p className="mt-1 text-xs text-gray-500">
+                        {interested.provider.averageRating.toFixed(1)} ★ (
+                        {interested.provider.totalReviews} reviews)
+                      </p>
+                    )}
+                    {interested.message && (
+                      <p className="mt-2 text-sm text-gray-700">
+                        {interested.message}
+                      </p>
+                    )}
+                    <p className="mt-2 text-xs text-gray-400">
+                      Interested {new Date(interested.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}

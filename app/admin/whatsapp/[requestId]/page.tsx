@@ -9,7 +9,31 @@ import {
   useSimulateWhatsAppReply,
   useTriggerWhatsAppFollowUp,
 } from '@/hooks/use-whatsapp'
+import { useRequest } from '@/hooks/use-requests'
 import { WhatsAppInteraction } from '@/lib/api/admin'
+
+function getRequestStatusBadgeColor(status: string) {
+  switch (status) {
+    case 'PENDING':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'ACCEPTED':
+      return 'bg-blue-100 text-blue-800'
+    case 'IN_PROGRESS':
+      return 'bg-purple-100 text-purple-800'
+    case 'DONE':
+      return 'bg-green-100 text-green-800'
+    case 'CANCELLED':
+      return 'bg-red-100 text-red-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+function getProviderTypeBadgeColor(type: 'PROFESSIONAL' | 'COMPANY') {
+  return type === 'COMPANY'
+    ? 'bg-emerald-100 text-emerald-800'
+    : 'bg-purple-100 text-purple-800'
+}
 
 function getMessageStatusBadgeColor(status: string) {
   switch (status) {
@@ -58,6 +82,7 @@ export default function WhatsAppThreadPage({
 }) {
   const { requestId } = use(params)
   const { data: config } = useWhatsAppConfig()
+  const { data: request } = useRequest(requestId)
   const { data: thread, isLoading, error } = useWhatsAppThread(requestId, {
     poll: true,
   })
@@ -99,6 +124,68 @@ export default function WhatsAppThreadPage({
       </Link>
 
       <h1 className="mb-6 text-3xl font-bold text-gray-900">WhatsApp thread</h1>
+
+      {request && (
+        <div className="mb-6 rounded-lg bg-white p-6 shadow">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <Link
+                href={`/admin/requests/${request.id}`}
+                className="text-lg font-semibold text-blue-600 hover:text-blue-900"
+              >
+                {request.title}
+              </Link>
+              <div className="mt-1">
+                <span
+                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getRequestStatusBadgeColor(request.status)}`}
+                >
+                  {request.status}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <span className="text-gray-500">Client:</span>
+              <p className="font-medium text-gray-900">
+                {request.client
+                  ? `${request.client.firstName} ${request.client.lastName}`
+                  : 'N/A'}
+              </p>
+            </div>
+            <div>
+              <span className="text-gray-500">Provider:</span>
+              {request.provider ? (
+                <p className="font-medium text-gray-900">
+                  {request.provider.name}{' '}
+                  <span
+                    className={`ml-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getProviderTypeBadgeColor(request.provider.type)}`}
+                  >
+                    {request.provider.type === 'COMPANY'
+                      ? 'Company'
+                      : 'Professional'}
+                  </span>
+                </p>
+              ) : (
+                <p className="font-medium text-gray-900">N/A</p>
+              )}
+            </div>
+            <div>
+              <span className="text-gray-500">Created:</span>
+              <p className="font-medium text-gray-900">
+                {new Date(request.createdAt).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <span className="text-gray-500">Updated:</span>
+              <p className="font-medium text-gray-900">
+                {new Date(request.updatedAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-lg bg-white p-6 shadow">
         {orderedThread.length === 0 ? (

@@ -270,7 +270,7 @@ export const adminApi = {
     limit = 10,
     search?: string,
     type?: 'CLIENT' | 'PROFESSIONAL' | 'COMPANY',
-  ) => {
+  ): Promise<PaginatedResponse<User>> => {
     let url = `/admin/users?page=${page}&limit=${limit}`
     if (search) {
       url += `&search=${encodeURIComponent(search)}`
@@ -278,8 +278,17 @@ export const adminApi = {
     if (type) {
       url += `&type=${type}`
     }
-    const response = await api.get<PaginatedResponse<User>>(url)
-    return response.data
+    const response = await api.get(url)
+
+    // Transform backend response format ({ data, meta }) to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
   },
 
   getUserById: async (id: string) => {

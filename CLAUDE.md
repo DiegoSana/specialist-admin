@@ -28,8 +28,14 @@ the browser since there's no automated coverage.
 
 ```
 app/admin/             All real routes live under /admin (login, dashboard, users, requests,
-                        professionals, companies). app/admin/layout.tsx is the auth+role guard
-                        and renders AdminSidebar + AdminHeader around children.
+                        professionals, companies, whatsapp). app/admin/layout.tsx is the
+                        auth+role guard and renders AdminSidebar + AdminHeader around children.
+app/admin/whatsapp/    WhatsApp conversations viewer: list page + [requestId] thread detail.
+                        First screen using TanStack Query's `refetchInterval` polling (the thread
+                        view polls every 5s) and the first using a backend-computed feature flag
+                        (`AdminWhatsAppConfig.devMode`) to conditionally render controls (the
+                        simulate-reply/trigger-followup dev tools only render when `devMode` is
+                        `true` — they don't exist against a production backend).
 app/test-shared/       Scratch page exercising @specialist/shared — stale, see Gotchas.
 components/admin/      sidebar.tsx, header.tsx. Feature UI otherwise lives inline under
                         app/admin/<feature>/ pages rather than being extracted to components/.
@@ -37,8 +43,9 @@ components/ui/         Not created yet, despite components.json being configured
                         (style "new-york", aliases @/components/ui, @/lib/utils). Use
                         `npx shadcn add <component>` to scaffold one instead of hand-rolling.
 hooks/                 One file per resource (use-users.ts, use-requests.ts, use-professionals.ts,
-                        use-companies.ts, use-dashboard.ts), TanStack Query wrappers, same shape
-                        as specialist-fe's hooks/ but hitting /admin/* endpoints.
+                        use-companies.ts, use-dashboard.ts, use-whatsapp.ts), TanStack Query
+                        wrappers, same shape as specialist-fe's hooks/ but hitting /admin/*
+                        endpoints.
 lib/api.ts             axios instance (`api`) + interceptors + `authApi` (login/logout/getMe).
 lib/api/admin.ts       Admin-specific request functions + hand-written response interfaces
                         (DashboardStats, User, ...) — see Gotchas re: duplication with

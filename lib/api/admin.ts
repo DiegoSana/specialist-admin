@@ -152,6 +152,45 @@ export interface PaginatedResponse<T> {
   totalPages: number
 }
 
+export interface AdminWhatsAppConfig {
+  devMode: boolean
+  availableFollowUpRules?: string[]
+}
+
+export interface WhatsAppConversationSummary {
+  requestId: string
+  requestTitle: string
+  requestStatus: string
+  clientName: string
+  providerName: string | null
+  lastMessagePreview: string
+  lastMessageAt: string
+  lastMessageDirection: string
+  lastMessageStatus: string
+}
+
+export interface WhatsAppInteraction {
+  id: string
+  requestId: string
+  interactionType: 'FOLLOW_UP' | 'RESPONSE' | 'STATUS_UPDATE'
+  status: 'PENDING' | 'SENT' | 'DELIVERED' | 'RESPONDED' | 'FAILED'
+  direction: 'TO_CLIENT' | 'TO_PROVIDER'
+  channel: string
+  messageTemplate: string
+  messageContent: string
+  responseContent: string | null
+  responseIntent: string | null
+  scheduledFor: string
+  sentAt: string | null
+  deliveredAt: string | null
+  respondedAt: string | null
+  twilioMessageSid: string | null
+  twilioStatus: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+  updatedAt: string
+}
+
 export const adminApi = {
   // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
@@ -260,6 +299,63 @@ export const adminApi = {
     const response = await api.put(`/admin/companies/${id}/status`, {
       status,
     })
+    return response.data
+  },
+
+  // WhatsApp conversations
+  getWhatsAppConfig: async (): Promise<AdminWhatsAppConfig> => {
+    const response = await api.get<AdminWhatsAppConfig>('/admin/whatsapp/config')
+    return response.data
+  },
+
+  getWhatsAppConversations: async (
+    page = 1,
+    limit = 20,
+    search?: string,
+  ): Promise<PaginatedResponse<WhatsAppConversationSummary>> => {
+    let url = `/admin/whatsapp/conversations?page=${page}&limit=${limit}`
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`
+    }
+    const response = await api.get(url)
+
+    // Transform backend response format to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
+  },
+
+  getWhatsAppThread: async (requestId: string): Promise<WhatsAppInteraction[]> => {
+    const response = await api.get<WhatsAppInteraction[]>(
+      `/admin/whatsapp/conversations/${requestId}`,
+    )
+    return response.data
+  },
+
+  simulateWhatsAppReply: async (
+    requestId: string,
+    body: string,
+  ): Promise<WhatsAppInteraction | null> => {
+    const response = await api.post<WhatsAppInteraction | null>(
+      `/admin/whatsapp/conversations/${requestId}/simulate-reply`,
+      { body },
+    )
+    return response.data
+  },
+
+  triggerWhatsAppFollowUp: async (
+    requestId: string,
+    ruleName: string,
+  ): Promise<{ interactionId: string }> => {
+    const response = await api.post<{ interactionId: string }>(
+      `/admin/whatsapp/conversations/${requestId}/trigger-followup`,
+      { ruleName },
+    )
     return response.data
   },
 }

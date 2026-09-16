@@ -144,6 +144,34 @@ export interface Company {
   updatedAt?: string
 }
 
+export interface Review {
+  id: string
+  reviewerId: string
+  professionalId: string
+  requestId: string | null
+  rating: number
+  comment: string | null
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  moderatedAt: string | null
+  moderatedBy: string | null
+  createdAt: string
+  updatedAt: string
+  reviewer?: {
+    id: string
+    firstName: string
+    lastName: string
+  }
+  professional?: {
+    id: string
+    userId: string
+    user?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
+  }
+}
+
 export interface PaginatedResponse<T> {
   data: T[]
   total: number
@@ -356,6 +384,22 @@ export const adminApi = {
       `/admin/whatsapp/conversations/${requestId}/trigger-followup`,
       { ruleName },
     )
+    return response.data
+  },
+
+  // Reviews (moderation) — lives under /reviews/admin/*, not /admin/*
+  getPendingReviews: async (): Promise<Review[]> => {
+    const response = await api.get<Review[]>('/reviews/admin/pending')
+    return response.data
+  },
+
+  approveReview: async (id: string): Promise<Review> => {
+    const response = await api.post<Review>(`/reviews/${id}/approve`)
+    return response.data
+  },
+
+  rejectReview: async (id: string): Promise<Review> => {
+    const response = await api.post<Review>(`/reviews/${id}/reject`)
     return response.data
   },
 }

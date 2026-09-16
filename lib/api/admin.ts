@@ -265,10 +265,18 @@ export const adminApi = {
   },
 
   // Users
-  getUsers: async (page = 1, limit = 10, search?: string) => {
+  getUsers: async (
+    page = 1,
+    limit = 10,
+    search?: string,
+    type?: 'CLIENT' | 'PROFESSIONAL' | 'COMPANY',
+  ) => {
     let url = `/admin/users?page=${page}&limit=${limit}`
     if (search) {
       url += `&search=${encodeURIComponent(search)}`
+    }
+    if (type) {
+      url += `&type=${type}`
     }
     const response = await api.get<PaginatedResponse<User>>(url)
     return response.data

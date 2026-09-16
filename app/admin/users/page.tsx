@@ -1,34 +1,21 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useUsers, useUpdateUserStatus } from '@/hooks/use-users'
 import { User } from '@/lib/api/admin'
 
-type TypeFilter = 'ALL' | 'CLIENT' | 'PROFESSIONAL' | 'COMPANY' | 'ADMIN'
+// No 'ADMIN' option here: isAdmin is a plain boolean on User, not a profile
+// relation like Client/Professional/Company, so it isn't a "type" to filter by
+// the same way — it's still shown as a badge per row.
+type TypeFilter = 'ALL' | 'CLIENT' | 'PROFESSIONAL' | 'COMPANY'
 
 const typeFilters: { value: TypeFilter; label: string }[] = [
   { value: 'ALL', label: 'All' },
   { value: 'CLIENT', label: 'Client' },
   { value: 'PROFESSIONAL', label: 'Professional' },
   { value: 'COMPANY', label: 'Company' },
-  { value: 'ADMIN', label: 'Admin' },
 ]
-
-function matchesTypeFilter(user: User, filter: TypeFilter) {
-  switch (filter) {
-    case 'CLIENT':
-      return user.hasClientProfile
-    case 'PROFESSIONAL':
-      return user.hasProfessionalProfile
-    case 'COMPANY':
-      return user.hasCompanyProfile
-    case 'ADMIN':
-      return user.isAdmin
-    default:
-      return true
-  }
-}
 
 export default function UsersPage() {
   const [page, setPage] = useState(1)
@@ -46,13 +33,20 @@ export default function UsersPage() {
     return () => clearTimeout(timeout)
   }, [searchInput])
 
-  const { data, isLoading, error } = useUsers(page, limit, search || undefined)
+  const handleTypeFilterChange = (filter: TypeFilter) => {
+    setTypeFilter(filter)
+    setPage(1)
+  }
+
+  const { data, isLoading, error } = useUsers(
+    page,
+    limit,
+    search || undefined,
+    typeFilter === 'ALL' ? undefined : typeFilter,
+  )
   const updateStatusMutation = useUpdateUserStatus()
 
-  const filteredUsers = useMemo(
-    () => data?.data.filter((user) => matchesTypeFilter(user, typeFilter)) ?? [],
-    [data, typeFilter],
-  )
+  const filteredUsers = data?.data ?? []
 
   const handleStatusChange = async (userId: string, newStatus: string) => {
     if (
@@ -92,7 +86,6 @@ export default function UsersPage() {
         <h1 className="text-3xl font-bold text-gray-900">Users</h1>
         <div className="text-sm text-gray-600">
           Total: {data?.total ?? 0} users
-          {typeFilter !== 'ALL' && ` (${filteredUsers.length} shown on this page)`}
         </div>
       </div>
 
@@ -102,7 +95,7 @@ export default function UsersPage() {
             <button
               key={filter.value}
               type="button"
-              onClick={() => setTypeFilter(filter.value)}
+              onClick={() => handleTypeFilterChange(filter.value)}
               className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
                 typeFilter === filter.value
                   ? 'bg-white text-gray-900 shadow'

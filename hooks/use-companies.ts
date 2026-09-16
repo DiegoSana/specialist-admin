@@ -1,14 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminApi, Company, PaginatedResponse } from '@/lib/api/admin'
-
-export function useCompanies(page = 1, limit = 10) {
-  return useQuery<PaginatedResponse<Company>>({
-    queryKey: ['admin', 'companies', page, limit],
-    queryFn: () => adminApi.getCompanies(page, limit),
-  })
-}
+import { adminApi, Company } from '@/lib/api/admin'
 
 export function useCompany(id: string) {
   return useQuery<Company>({

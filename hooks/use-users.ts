@@ -3,10 +3,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi, User, PaginatedResponse } from '@/lib/api/admin'
 
-export function useUsers(page = 1, limit = 10) {
+export function useUsers(
+  page = 1,
+  limit = 10,
+  search?: string,
+  type?: 'CLIENT' | 'PROFESSIONAL' | 'COMPANY',
+) {
   return useQuery<PaginatedResponse<User>>({
-    queryKey: ['admin', 'users', page, limit],
-    queryFn: () => adminApi.getUsers(page, limit),
+    queryKey: ['admin', 'users', page, limit, search, type],
+    queryFn: () => adminApi.getUsers(page, limit, search, type),
   })
 }
 

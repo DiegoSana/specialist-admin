@@ -44,10 +44,44 @@ export interface User {
   updatedAt: string
   hasClientProfile: boolean
   hasProfessionalProfile: boolean
-  hasCompanyProfile?: boolean
+  hasCompanyProfile: boolean
   isAdmin: boolean
   emailVerified?: boolean
   phoneVerified?: boolean
+}
+
+export interface RequestProviderTrade {
+  id: string
+  name: string
+}
+
+export interface RequestProvider {
+  id: string
+  type: 'PROFESSIONAL' | 'COMPANY'
+  name: string
+  trades?: RequestProviderTrade[]
+}
+
+export interface InterestedProviderInfo {
+  id: string
+  type: 'PROFESSIONAL' | 'COMPANY'
+  displayName: string
+  profileImage: string | null
+  averageRating: number
+  totalReviews: number
+  whatsapp: string | null
+  phone: string | null
+}
+
+export interface InterestedProvider {
+  id: string
+  requestId: string
+  serviceProviderId: string
+  /** @deprecated use serviceProviderId */
+  professionalId: string
+  message: string | null
+  createdAt: string
+  provider?: InterestedProviderInfo
 }
 
 export interface Request {
@@ -57,19 +91,23 @@ export interface Request {
   status: string
   createdAt: string
   updatedAt: string
-  clientId: string
+  clientId?: string
   client?: {
     id: string
     firstName: string
     lastName: string
     email: string
+    profilePictureUrl?: string | null
   }
   address?: string | null
   photos?: string[]
   trade?: {
     id: string
     name: string
-  }
+  } | null
+  provider?: RequestProvider | null
+  /** Only present on the GET /admin/requests/:id detail response, not the list. */
+  interestedProviders?: InterestedProvider[]
 }
 
 export interface Professional {
@@ -227,11 +265,30 @@ export const adminApi = {
   },
 
   // Users
-  getUsers: async (page = 1, limit = 10) => {
-    const response = await api.get<PaginatedResponse<User>>(
-      `/admin/users?page=${page}&limit=${limit}`,
-    )
-    return response.data
+  getUsers: async (
+    page = 1,
+    limit = 10,
+    search?: string,
+    type?: 'CLIENT' | 'PROFESSIONAL' | 'COMPANY',
+  ): Promise<PaginatedResponse<User>> => {
+    let url = `/admin/users?page=${page}&limit=${limit}`
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`
+    }
+    if (type) {
+      url += `&type=${type}`
+    }
+    const response = await api.get(url)
+
+    // Transform backend response format ({ data, meta }) to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
   },
 
   getUserById: async (id: string) => {
@@ -272,25 +329,11 @@ export const adminApi = {
   },
 
   getRequestById: async (id: string) => {
-    const response = await api.get<Request>(`/requests/${id}`)
+    const response = await api.get<Request>(`/admin/requests/${id}`)
     return response.data
   },
 
   // Professionals
-  getProfessionals: async (page = 1, limit = 10) => {
-    const response = await api.get(`/admin/professionals?page=${page}&limit=${limit}`)
-    
-    // Transform backend response format to match our interface
-    const backendData = response.data
-    return {
-      data: backendData.data || [],
-      total: backendData.meta?.total || 0,
-      page: backendData.meta?.page || page,
-      limit: backendData.meta?.limit || limit,
-      totalPages: backendData.meta?.totalPages || 0,
-    }
-  },
-
   getProfessionalById: async (id: string) => {
     const response = await api.get<Professional>(`/admin/professionals/${id}`)
     return response.data
@@ -304,20 +347,6 @@ export const adminApi = {
   },
 
   // Companies
-  getCompanies: async (page = 1, limit = 10) => {
-    const response = await api.get(`/admin/companies?page=${page}&limit=${limit}`)
-    
-    // Transform backend response format to match our interface
-    const backendData = response.data
-    return {
-      data: backendData.data || [],
-      total: backendData.meta?.total || 0,
-      page: backendData.meta?.page || page,
-      limit: backendData.meta?.limit || limit,
-      totalPages: backendData.meta?.totalPages || 0,
-    }
-  },
-
   getCompanyById: async (id: string) => {
     const response = await api.get<Company>(`/admin/companies/${id}`)
     return response.data

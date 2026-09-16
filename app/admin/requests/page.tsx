@@ -28,6 +28,11 @@ export default function RequestsPage() {
     }
   }
 
+  const getProviderTypeBadgeColor = (type: 'PROFESSIONAL' | 'COMPANY') =>
+    type === 'COMPANY'
+      ? 'bg-emerald-100 text-emerald-800'
+      : 'bg-purple-100 text-purple-800'
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -87,6 +92,9 @@ export default function RequestsPage() {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Provider
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Location
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -100,7 +108,7 @@ export default function RequestsPage() {
           <tbody className="divide-y divide-gray-200 bg-white">
             {!data || !data.data || data.data.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                   No requests found
                 </td>
               </tr>
@@ -131,6 +139,22 @@ export default function RequestsPage() {
                     >
                       {request.status}
                     </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {request.provider ? (
+                      <div>
+                        <div className="font-medium">{request.provider.name}</div>
+                        <span
+                          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getProviderTypeBadgeColor(request.provider.type)}`}
+                        >
+                          {request.provider.type === 'COMPANY'
+                            ? 'Company'
+                            : 'Professional'}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {request.address || 'N/A'}

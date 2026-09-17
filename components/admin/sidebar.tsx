@@ -2,7 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, FileText, Settings, MessageSquare, Star } from 'lucide-react'
+import {
+  Home,
+  Users,
+  FileText,
+  Settings,
+  MessageSquare,
+  Star,
+  AlertTriangle,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navigation = [
@@ -10,6 +18,7 @@ const navigation = [
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Requests', href: '/admin/requests', icon: FileText },
   { name: 'Reviews', href: '/admin/reviews', icon: Star },
+  { name: 'Requiere atención', href: '/admin/attention', icon: AlertTriangle },
   { name: 'WhatsApp', href: '/admin/whatsapp', icon: MessageSquare },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ]

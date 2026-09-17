@@ -194,16 +194,32 @@ export default function UserDetailPage({
                 Client Profile
               </span>
             )}
-            {user.hasProfessionalProfile && (
-              <span className="inline-block rounded bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
-                Professional Profile
-              </span>
-            )}
-            {user.hasCompanyProfile && (
-              <span className="inline-block rounded bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
-                Company Profile
-              </span>
-            )}
+            {user.hasProfessionalProfile &&
+              (user.professionalId ? (
+                <Link
+                  href={`/admin/professionals/${user.professionalId}`}
+                  className="inline-block rounded bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800 hover:bg-purple-200 hover:underline"
+                >
+                  Professional Profile
+                </Link>
+              ) : (
+                <span className="inline-block rounded bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
+                  Professional Profile
+                </span>
+              ))}
+            {user.hasCompanyProfile &&
+              (user.companyId ? (
+                <Link
+                  href={`/admin/companies/${user.companyId}`}
+                  className="inline-block rounded bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 hover:bg-emerald-200 hover:underline"
+                >
+                  Company Profile
+                </Link>
+              ) : (
+                <span className="inline-block rounded bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+                  Company Profile
+                </span>
+              ))}
             {user.isAdmin && (
               <span className="inline-block rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
                 Admin

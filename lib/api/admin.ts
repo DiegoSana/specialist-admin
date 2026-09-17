@@ -268,6 +268,16 @@ export interface EmailProviderStatus {
   }
 }
 
+export interface AttentionFlagSummary {
+  id: string
+  requestId: string
+  requestTitle: string
+  requestStatus: string
+  reason: 'AT_RISK' | 'ABANDONED' | 'ESCALATED'
+  detail: string | null
+  createdAt: string
+}
+
 export const adminApi = {
   // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
@@ -449,5 +459,29 @@ export const adminApi = {
   rejectReview: async (id: string): Promise<Review> => {
     const response = await api.post<Review>(`/reviews/${id}/reject`)
     return response.data
+  },
+
+  // Requests needing attention (AT_RISK/ABANDONED/ESCALATED, from the WhatsApp AI follow-up classifier)
+  getAttentionFlags: async (
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResponse<AttentionFlagSummary>> => {
+    const response = await api.get(
+      `/admin/requests/attention?page=${page}&limit=${limit}`,
+    )
+
+    // Transform backend response format to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
+  },
+
+  resolveAttentionFlag: async (id: string): Promise<void> => {
+    await api.post(`/admin/requests/attention/${id}/resolve`)
   },
 }

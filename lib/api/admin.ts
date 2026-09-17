@@ -48,6 +48,8 @@ export interface User {
   isAdmin: boolean
   emailVerified?: boolean
   phoneVerified?: boolean
+  professionalId?: string | null
+  companyId?: string | null
 }
 
 export interface RequestProviderTrade {

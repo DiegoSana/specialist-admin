@@ -257,6 +257,15 @@ export interface WhatsAppInteraction {
   updatedAt: string
 }
 
+export interface EmailProviderStatus {
+  provider: 'smtp' | 'mailgun' | 'ethereal'
+  ethereal?: {
+    loginUrl: string
+    user: string
+    pass: string
+  }
+}
+
 export const adminApi = {
   // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
@@ -412,6 +421,14 @@ export const adminApi = {
     const response = await api.post<{ interactionId: string }>(
       `/admin/whatsapp/conversations/${requestId}/trigger-followup`,
       { ruleName },
+    )
+    return response.data
+  },
+
+  // Notifications
+  getEmailStatus: async (): Promise<EmailProviderStatus> => {
+    const response = await api.get<EmailProviderStatus>(
+      '/admin/notifications/email-status',
     )
     return response.data
   },

@@ -2,6 +2,7 @@
 
 import { useAdminAuth } from '@/hooks/use-admin-auth'
 import { LogOut, User } from 'lucide-react'
+import { NotificationBell } from './notification-bell'
 
 interface AdminHeaderProps {
   user: any
@@ -20,6 +21,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
       </div>
       <div className="flex items-center gap-4">
+        <NotificationBell />
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <User className="h-4 w-4" />
           <span>

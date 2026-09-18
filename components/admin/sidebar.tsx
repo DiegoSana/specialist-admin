@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSupportConversations } from '@/hooks/use-support'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
@@ -27,6 +28,8 @@ const navigation = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const { data: openSupport } = useSupportConversations('OPEN', 1, 1)
+  const openSupportCount = openSupport?.total ?? 0
 
   return (
     <div className="flex w-64 flex-col bg-gray-900">
@@ -49,6 +52,11 @@ export function AdminSidebar() {
             >
               <item.icon className="h-5 w-5" />
               {item.name}
+              {item.href === '/admin/support' && openSupportCount > 0 && (
+                <span className="ml-auto rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  {openSupportCount}
+                </span>
+              )}
             </Link>
           )
         })}

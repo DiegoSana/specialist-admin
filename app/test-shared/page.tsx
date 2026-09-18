@@ -1,6 +1,6 @@
 'use client'
 
-import { User, UserRole, loginSchema, LoginDTO, USER_ROLES } from '@specialist/shared'
+import { User, UserStatus, loginSchema, LoginDTO, USER_STATUS } from '@specialist/shared'
 import { useState } from 'react'
 
 export default function TestSharedPage() {
@@ -9,8 +9,17 @@ export default function TestSharedPage() {
   const testUser: User = {
     id: '1',
     email: 'test@example.com',
-    name: 'Test User',
-    role: UserRole.ADMIN,
+    firstName: 'Test',
+    lastName: 'User',
+    phone: null,
+    profilePictureUrl: null,
+    isAdmin: true,
+    status: UserStatus.ACTIVE,
+    hasClientProfile: false,
+    hasProfessionalProfile: false,
+    hasCompanyProfile: false,
+    phoneVerified: false,
+    emailVerified: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -42,7 +51,7 @@ export default function TestSharedPage() {
 
         <div className="p-4 border rounded">
           <h2 className="text-xl font-semibold mb-2">Constants</h2>
-          <p>User Roles: {Object.values(USER_ROLES).join(', ')}</p>
+          <p>User Statuses: {Object.values(USER_STATUS).join(', ')}</p>
         </div>
 
         <div className="p-4 border rounded">

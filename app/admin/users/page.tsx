@@ -172,11 +172,18 @@ export default function UsersPage() {
                         {user.email}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(user.status)}`}
-                        >
-                          {user.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(user.status)}`}
+                          >
+                            {user.status}
+                          </span>
+                          {user.whatsappOptedOut === true && (
+                            <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
+                              WhatsApp opt-out
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                         <div className="flex gap-2">

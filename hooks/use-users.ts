@@ -57,5 +57,25 @@ export function useUpdateUserVerification() {
   })
 }
 
+export function useUpdateUserWhatsAppOptOut() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      whatsappOptedOut,
+    }: {
+      id: string
+      whatsappOptedOut: boolean
+    }) => adminApi.updateUserWhatsAppOptOut(id, whatsappOptedOut),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', variables.id],
+      })
+    },
+  })
+}
+
 
 

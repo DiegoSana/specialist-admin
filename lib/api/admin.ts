@@ -48,6 +48,8 @@ export interface User {
   isAdmin: boolean
   emailVerified?: boolean
   phoneVerified?: boolean
+  whatsappOptedOut?: boolean
+  whatsappOptedOutAt?: string | null
   professionalId?: string | null
   companyId?: string | null
 }
@@ -327,6 +329,13 @@ export const adminApi = {
     data: { emailVerified?: boolean; phoneVerified?: boolean },
   ) => {
     const response = await api.put<User>(`/admin/users/${id}/verification`, data)
+    return response.data
+  },
+
+  updateUserWhatsAppOptOut: async (id: string, whatsappOptedOut: boolean) => {
+    const response = await api.put<User>(`/admin/users/${id}/whatsapp-opt-out`, {
+      whatsappOptedOut,
+    })
     return response.data
   },
 

@@ -1,9 +1,13 @@
 'use client'
 
 import { use } from 'react'
-import { useUser, useUpdateUserVerification } from '@/hooks/use-users'
+import {
+  useUser,
+  useUpdateUserVerification,
+  useUpdateUserWhatsAppOptOut,
+} from '@/hooks/use-users'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, Check, X } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, MessageCircle, Check, X } from 'lucide-react'
 
 export default function UserDetailPage({
   params,
@@ -13,6 +17,7 @@ export default function UserDetailPage({
   const { id } = use(params)
   const { data: user, isLoading, error } = useUser(id)
   const updateVerification = useUpdateUserVerification()
+  const updateWhatsAppOptOut = useUpdateUserWhatsAppOptOut()
 
   if (isLoading) {
     return (
@@ -181,6 +186,83 @@ export default function UserDetailPage({
             {updateVerification.isError && (
               <p className="text-sm text-red-600">
                 Error updating verification. Try again.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            WhatsApp opt-out (admin override)
+          </h2>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-700">WhatsApp</span>
+                {user.whatsappOptedOut === true ? (
+                  <span className="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                    <X className="h-3 w-3" /> Opted out
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                    <Check className="h-3 w-3" /> Opted in
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "Mark this user opted out of WhatsApp? They'll be blocked from creating/taking requests until this is reverted, and will receive an email explaining why.",
+                      )
+                    ) {
+                      updateWhatsAppOptOut.mutate({ id, whatsappOptedOut: true })
+                    }
+                  }}
+                  disabled={
+                    updateWhatsAppOptOut.isPending ||
+                    user.whatsappOptedOut === true
+                  }
+                  className="rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  Mark opt-out
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "Revert this user's WhatsApp opt-out and allow them to create/take requests again?",
+                      )
+                    ) {
+                      updateWhatsAppOptOut.mutate({
+                        id,
+                        whatsappOptedOut: false,
+                      })
+                    }
+                  }}
+                  disabled={
+                    updateWhatsAppOptOut.isPending ||
+                    user.whatsappOptedOut !== true
+                  }
+                  className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Revert opt-out
+                </button>
+              </div>
+            </div>
+            {user.whatsappOptedOut === true && user.whatsappOptedOutAt && (
+              <p className="text-sm text-gray-500">
+                Opted out on{' '}
+                {new Date(user.whatsappOptedOutAt).toLocaleString()}
+              </p>
+            )}
+            {updateWhatsAppOptOut.isError && (
+              <p className="text-sm text-red-600">
+                Error updating WhatsApp opt-out. Try again.
               </p>
             )}
           </div>

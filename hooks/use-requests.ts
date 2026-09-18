@@ -1,12 +1,32 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { adminApi, Request, PaginatedResponse } from '@/lib/api/admin'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import {
+  adminApi,
+  Request,
+  PaginatedResponse,
+  RequestFilters,
+} from '@/lib/api/admin'
 
-export function useRequests(page = 1, limit = 10, status?: string) {
+export function useRequests(
+  page = 1,
+  limit = 10,
+  status?: string,
+  filters: RequestFilters = {},
+) {
   return useQuery<PaginatedResponse<Request>>({
-    queryKey: ['admin', 'requests', page, limit, status],
-    queryFn: () => adminApi.getRequests(page, limit, status),
+    queryKey: [
+      'admin',
+      'requests',
+      page,
+      limit,
+      status,
+      filters.title,
+      filters.client,
+      filters.provider,
+    ],
+    queryFn: () => adminApi.getRequests(page, limit, status, filters),
+    placeholderData: keepPreviousData,
   })
 }
 

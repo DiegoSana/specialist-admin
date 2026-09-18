@@ -214,6 +214,12 @@ export interface Review {
   }
 }
 
+export interface RequestFilters {
+  title?: string
+  client?: string
+  provider?: string
+}
+
 export interface PaginatedResponse<T> {
   data: T[]
   total: number
@@ -375,12 +381,21 @@ export const adminApi = {
   },
 
   // Requests (using admin endpoint)
-  getRequests: async (page = 1, limit = 10, status?: string) => {
-    let url = `/admin/requests?page=${page}&limit=${limit}`
-    if (status) {
-      url += `&status=${status}`
-    }
-    const response = await api.get(url)
+  getRequests: async (
+    page = 1,
+    limit = 10,
+    status?: string,
+    filters: RequestFilters = {},
+  ) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    })
+    if (status) params.set('status', status)
+    if (filters.title) params.set('title', filters.title)
+    if (filters.client) params.set('client', filters.client)
+    if (filters.provider) params.set('provider', filters.provider)
+    const response = await api.get(`/admin/requests?${params.toString()}`)
     
     // Transform backend response format to match our interface
     const backendData = response.data

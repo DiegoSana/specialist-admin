@@ -280,6 +280,16 @@ export interface AttentionFlagSummary {
   createdAt: string
 }
 
+export interface InAppNotification {
+  id: string
+  type: string
+  title: string
+  body?: string | null
+  data?: Record<string, unknown> | null
+  readAt?: string | null
+  createdAt: string
+}
+
 export interface SupportConversation {
   id: string
   phoneNumber: string
@@ -477,6 +487,22 @@ export const adminApi = {
       '/admin/notifications/email-status',
     )
     return response.data
+  },
+
+  // The admin's own in-app notifications (same endpoints as any user; not under /admin/*)
+  getNotifications: async (unreadOnly = false, take = 20): Promise<InAppNotification[]> => {
+    const response = await api.get<InAppNotification[]>(
+      `/notifications?take=${take}${unreadOnly ? '&unreadOnly=true' : ''}`,
+    )
+    return response.data
+  },
+
+  markNotificationRead: async (id: string): Promise<void> => {
+    await api.patch(`/notifications/${id}/read`)
+  },
+
+  markAllNotificationsRead: async (): Promise<void> => {
+    await api.patch('/notifications/read-all')
   },
 
   // Reviews (moderation) — lives under /reviews/admin/*, not /admin/*

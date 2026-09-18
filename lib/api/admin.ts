@@ -63,6 +63,8 @@ export interface RequestProvider {
   id: string
   type: 'PROFESSIONAL' | 'COMPANY'
   name: string
+  /** Owning user id, for linking to /admin/users/:id */
+  userId?: string
   trades?: RequestProviderTrade[]
 }
 

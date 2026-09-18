@@ -149,16 +149,32 @@ export default function WhatsAppThreadPage({
             <div>
               <span className="text-gray-500">Client:</span>
               <p className="font-medium text-gray-900">
-                {request.client
-                  ? `${request.client.firstName} ${request.client.lastName}`
-                  : 'N/A'}
+                {request.client ? (
+                  <Link
+                    href={`/admin/users/${request.client.id}`}
+                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    {`${request.client.firstName} ${request.client.lastName}`}
+                  </Link>
+                ) : (
+                  'N/A'
+                )}
               </p>
             </div>
             <div>
               <span className="text-gray-500">Provider:</span>
               {request.provider ? (
                 <p className="font-medium text-gray-900">
-                  {request.provider.name}{' '}
+                  {request.provider.userId ? (
+                    <Link
+                      href={`/admin/users/${request.provider.userId}`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {request.provider.name}
+                    </Link>
+                  ) : (
+                    request.provider.name
+                  )}{' '}
                   <span
                     className={`ml-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getProviderTypeBadgeColor(request.provider.type)}`}
                   >

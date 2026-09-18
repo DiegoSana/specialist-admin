@@ -280,6 +280,31 @@ export interface AttentionFlagSummary {
   createdAt: string
 }
 
+export interface SupportConversation {
+  id: string
+  phoneNumber: string
+  userId: string | null
+  relatedRequestId: string | null
+  status: 'OPEN' | 'RESOLVED'
+  lastInboundAt: string | null
+  lastOutboundAt: string | null
+  createdAt: string
+  updatedAt: string
+  resolvedAt: string | null
+  resolvedByUserId: string | null
+  canReplyNow: boolean
+}
+
+export interface SupportMessage {
+  id: string
+  conversationId: string
+  direction: 'INBOUND' | 'OUTBOUND'
+  body: string
+  twilioMessageSid: string | null
+  sentByUserId: string | null
+  createdAt: string
+}
+
 export const adminApi = {
   // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
@@ -492,5 +517,52 @@ export const adminApi = {
 
   resolveAttentionFlag: async (id: string): Promise<void> => {
     await api.post(`/admin/requests/attention/${id}/resolve`)
+  },
+
+  // Support conversations (general WhatsApp messages not tied to a follow-up)
+  getSupportConversations: async (
+    status: 'OPEN' | 'RESOLVED' | 'ALL' = 'OPEN',
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResponse<SupportConversation>> => {
+    const response = await api.get(
+      `/admin/support/conversations?status=${status}&page=${page}&limit=${limit}`,
+    )
+
+    // Transform backend response format ({ data, meta }) to match our interface
+    const backendData = response.data
+    return {
+      data: backendData.data || [],
+      total: backendData.meta?.total || 0,
+      page: backendData.meta?.page || page,
+      limit: backendData.meta?.limit || limit,
+      totalPages: backendData.meta?.totalPages || 0,
+    }
+  },
+
+  getSupportConversation: async (
+    id: string,
+  ): Promise<{ conversation: SupportConversation; messages: SupportMessage[] }> => {
+    const response = await api.get(`/admin/support/conversations/${id}`)
+    return response.data
+  },
+
+  replySupportConversation: async (
+    id: string,
+    message: string,
+  ): Promise<SupportMessage> => {
+    const response = await api.post<SupportMessage>(
+      `/admin/support/conversations/${id}/reply`,
+      { message },
+    )
+    return response.data
+  },
+
+  resolveSupportConversation: async (id: string): Promise<void> => {
+    await api.post(`/admin/support/conversations/${id}/resolve`)
+  },
+
+  reopenSupportConversation: async (id: string): Promise<void> => {
+    await api.post(`/admin/support/conversations/${id}/reopen`)
   },
 }

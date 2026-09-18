@@ -8,6 +8,7 @@ import {
   FileText,
   Settings,
   MessageSquare,
+  MessageCircle,
   Star,
   AlertTriangle,
 } from 'lucide-react'
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Reviews', href: '/admin/reviews', icon: Star },
   { name: 'Requiere atención', href: '/admin/attention', icon: AlertTriangle },
   { name: 'WhatsApp', href: '/admin/whatsapp', icon: MessageSquare },
+  { name: 'Soporte', href: '/admin/support', icon: MessageCircle },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 

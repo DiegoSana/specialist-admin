@@ -225,10 +225,10 @@ export default function RequestDetailPage({
             )}
           </div>
 
-          {/* Review */}
+          {/* Client's review of specialist */}
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Review
+              Client&apos;s review of specialist
             </h2>
             {request.review ? (
               <div className="space-y-2">
@@ -257,6 +257,34 @@ export default function RequestDetailPage({
               </div>
             ) : (
               <p className="text-sm text-gray-500">No review yet</p>
+            )}
+          </div>
+
+          {/* Specialist's rating of client */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              Specialist&apos;s rating of client
+            </h2>
+            {request.clientRating != null ? (
+              <div className="space-y-2">
+                <div>
+                  <span className="text-sm text-gray-500">Rating:</span>
+                  <p className="text-gray-900">
+                    {'★'.repeat(request.clientRating)}
+                    {'☆'.repeat(5 - request.clientRating)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Comment:</span>
+                  <p className="text-gray-900">
+                    {request.clientRatingComment || (
+                      <span className="text-gray-400">No comment</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">Not rated yet</p>
             )}
           </div>
 

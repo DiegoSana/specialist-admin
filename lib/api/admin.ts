@@ -131,6 +131,14 @@ export interface Request {
   isPublic?: boolean
   /** Only present on the GET /admin/requests/:id detail response, not the list. */
   review?: RequestReview | null
+  /**
+   * The provider's rating of the client (1-5), set via POST /requests/:id/rate-client once the
+   * request is CLOSED. Independent of `review` above (which is the client rating the provider,
+   * from the Reputation context) and has no moderation status. Only present on the GET
+   * /admin/requests/:id detail response, not the list.
+   */
+  clientRating?: number | null
+  clientRatingComment?: string | null
 }
 
 export interface Professional {

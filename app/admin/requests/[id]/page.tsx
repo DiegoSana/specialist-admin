@@ -20,11 +20,12 @@ export default function RequestDetailPage({
   const updateStatusMutation = useUpdateRequestStatus()
 
   const handleStatusChange = async (newStatus: string) => {
-    if (
-      confirm(
-        `Are you sure you want to change this request's status to ${getStatusLabel(newStatus)}? This bypasses normal status transitions.`,
-      )
-    ) {
+    const confirmMessage =
+      newStatus === 'PUBLISHED' && request?.provider
+        ? `Are you sure you want to change this request's status to ${getStatusLabel(newStatus)}? This bypasses normal status transitions. It will also automatically unassign the current provider, make the request public again, and reset all interested providers back to selectable.`
+        : `Are you sure you want to change this request's status to ${getStatusLabel(newStatus)}? This bypasses normal status transitions.`
+
+    if (confirm(confirmMessage)) {
       try {
         await updateStatusMutation.mutateAsync({ id, status: newStatus })
       } catch {
@@ -54,6 +55,14 @@ export default function RequestDetailPage({
       ? 'bg-emerald-100 text-emerald-800'
       : 'bg-purple-100 text-purple-800'
 
+  const getReviewStatusBadgeColor = (
+    status: 'PENDING' | 'APPROVED' | 'REJECTED',
+  ) => {
+    if (status === 'APPROVED') return 'bg-green-100 text-green-800'
+    if (status === 'REJECTED') return 'bg-red-100 text-red-800'
+    return 'bg-yellow-100 text-yellow-800'
+  }
+
   return (
     <div>
       <Link
@@ -65,7 +74,18 @@ export default function RequestDetailPage({
       </Link>
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold text-gray-900">{request.title}</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">{request.title}</h1>
+          <span
+            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+              request.isPublic
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {request.isPublic ? 'Public' : 'Direct'}
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/whatsapp/${request.id}`}
@@ -189,6 +209,41 @@ export default function RequestDetailPage({
               </div>
             ) : (
               <p className="text-sm text-gray-500">No provider assigned yet</p>
+            )}
+          </div>
+
+          {/* Review */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              Review
+            </h2>
+            {request.review ? (
+              <div className="space-y-2">
+                <div>
+                  <span className="text-sm text-gray-500">Rating:</span>
+                  <p className="text-gray-900">
+                    {'★'.repeat(request.review.rating)}
+                    {'☆'.repeat(5 - request.review.rating)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Comment:</span>
+                  <p className="text-gray-900">
+                    {request.review.comment || (
+                      <span className="text-gray-400">No comment</span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getReviewStatusBadgeColor(request.review.status)}`}
+                  >
+                    {request.review.status}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No review yet</p>
             )}
           </div>
 

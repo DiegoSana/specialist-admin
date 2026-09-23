@@ -90,6 +90,19 @@ export interface InterestedProvider {
   provider?: InterestedProviderInfo
 }
 
+/**
+ * The request's single review, as embedded in the GET /admin/requests/:id response
+ * (AdminRequestReviewDto in specialist-be) — a small subset of the full `Review` shape below
+ * (no reviewerId/professionalId/requestId/moderation metadata), so kept as its own type rather
+ * than reusing `Review` directly.
+ */
+export interface RequestReview {
+  id: string
+  rating: number
+  comment: string | null
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+}
+
 export interface Request {
   id: string
   title: string
@@ -114,6 +127,10 @@ export interface Request {
   provider?: RequestProvider | null
   /** Only present on the GET /admin/requests/:id detail response, not the list. */
   interestedProviders?: InterestedProvider[]
+  /** Only present on the GET /admin/requests/:id detail response, not the list. */
+  isPublic?: boolean
+  /** Only present on the GET /admin/requests/:id detail response, not the list. */
+  review?: RequestReview | null
 }
 
 export interface Professional {

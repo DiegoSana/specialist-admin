@@ -1,7 +1,12 @@
 'use client'
 
 import { use } from 'react'
-import { useRequest } from '@/hooks/use-requests'
+import { useRequest, useUpdateRequestStatus } from '@/hooks/use-requests'
+import {
+  REQUEST_STATUSES,
+  getStatusBadgeColor,
+  getStatusLabel,
+} from '@/lib/request-status'
 import Link from 'next/link'
 import { ArrowLeft, MessageSquare } from 'lucide-react'
 
@@ -12,6 +17,21 @@ export default function RequestDetailPage({
 }) {
   const { id } = use(params)
   const { data: request, isLoading, error } = useRequest(id)
+  const updateStatusMutation = useUpdateRequestStatus()
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (
+      confirm(
+        `Are you sure you want to change this request's status to ${getStatusLabel(newStatus)}? This bypasses normal status transitions.`,
+      )
+    ) {
+      try {
+        await updateStatusMutation.mutateAsync({ id, status: newStatus })
+      } catch {
+        alert('Failed to update request status')
+      }
+    }
+  }
 
   if (isLoading) {
     return (
@@ -27,23 +47,6 @@ export default function RequestDetailPage({
         Error loading request. Please try again.
       </div>
     )
-  }
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'ACCEPTED':
-        return 'bg-blue-100 text-blue-800'
-      case 'IN_PROGRESS':
-        return 'bg-purple-100 text-purple-800'
-      case 'DONE':
-        return 'bg-green-100 text-green-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
   }
 
   const getProviderTypeBadgeColor = (type: 'PROFESSIONAL' | 'COMPANY') =>
@@ -71,11 +74,26 @@ export default function RequestDetailPage({
             <MessageSquare className="h-4 w-4" />
             View WhatsApp conversation
           </Link>
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${getStatusBadgeColor(request.status)}`}
+          <select
+            value={request.status}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            disabled={updateStatusMutation.isPending}
+            className={`rounded-full px-3 py-1 text-sm font-semibold ${getStatusBadgeColor(request.status)} border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50`}
           >
-            {request.status}
-          </span>
+            {REQUEST_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {getStatusLabel(status)}
+              </option>
+            ))}
+          </select>
+          {updateStatusMutation.isPending && (
+            <span className="text-xs text-gray-500">Updating…</span>
+          )}
+          {updateStatusMutation.isError && (
+            <span className="text-xs text-red-600">
+              Failed to update status
+            </span>
+          )}
         </div>
       </div>
 

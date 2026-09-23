@@ -415,6 +415,18 @@ export const adminApi = {
     return response.data
   },
 
+  updateRequestStatus: async (
+    id: string,
+    status: string,
+    statusReason?: string,
+  ) => {
+    const response = await api.put(`/admin/requests/${id}/status`, {
+      status,
+      statusReason,
+    })
+    return response.data
+  },
+
   // Professionals
   getProfessionalById: async (id: string) => {
     const response = await api.get<Professional>(`/admin/professionals/${id}`)

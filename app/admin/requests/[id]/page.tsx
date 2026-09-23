@@ -3,6 +3,7 @@
 import { use } from 'react'
 import { useRequest, useUpdateRequestStatus } from '@/hooks/use-requests'
 import {
+  PROVIDER_REQUIRED_STATUSES,
   REQUEST_STATUSES,
   getStatusBadgeColor,
   getStatusLabel,
@@ -101,7 +102,13 @@ export default function RequestDetailPage({
             className={`rounded-full px-3 py-1 text-sm font-semibold ${getStatusBadgeColor(request.status)} border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50`}
           >
             {REQUEST_STATUSES.map((status) => (
-              <option key={status} value={status}>
+              <option
+                key={status}
+                value={status}
+                disabled={
+                  !request.provider && PROVIDER_REQUIRED_STATUSES.has(status)
+                }
+              >
                 {getStatusLabel(status)}
               </option>
             ))}
@@ -116,6 +123,12 @@ export default function RequestDetailPage({
           )}
         </div>
       </div>
+
+      {!request.provider && (
+        <p className="-mt-4 mb-6 text-right text-xs text-gray-500">
+          Statuses requiring a provider are disabled until one is assigned
+        </p>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">

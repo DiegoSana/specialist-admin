@@ -24,6 +24,25 @@ export const REQUEST_STATUSES = [
 
 export type RequestStatus = (typeof REQUEST_STATUSES)[number]
 
+// Statuses that `PUT /admin/requests/:id/status` (specialist-be, RequestService.updateStatus,
+// see PROVIDER_REQUIRED_STATUSES in request.entity.ts) rejects with a 400 when the request has
+// no assigned provider. Kept here as the one shared source of truth so the status <select> can
+// disable these options instead of letting the admin hit the server error. DRAFT, PUBLISHED,
+// EXPIRED and CANCELLED are exempt on the backend and must stay out of this set.
+export const PROVIDER_REQUIRED_STATUSES: ReadonlySet<RequestStatus> = new Set([
+  'SENT',
+  'CONTACT_RELEASED',
+  'IN_PROGRESS',
+  'FINISHED',
+  'CLOSED',
+  'UNDER_REVIEW',
+  'NOT_COMPLETED',
+  'INTERRUPTED',
+  'ABANDONED',
+  'REJECTED',
+  'NO_RESPONSE',
+])
+
 interface RequestStatusMeta {
   label: string
   badgeClass: string

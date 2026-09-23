@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRequests } from '@/hooks/use-requests'
 import { Request } from '@/lib/api/admin'
+import {
+  REQUEST_STATUSES,
+  getStatusBadgeColor,
+  getStatusLabel,
+} from '@/lib/request-status'
 import Link from 'next/link'
 
 const inputClass =
@@ -44,23 +49,6 @@ export default function RequestsPage() {
     },
   )
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'ACCEPTED':
-        return 'bg-blue-100 text-blue-800'
-      case 'IN_PROGRESS':
-        return 'bg-purple-100 text-purple-800'
-      case 'DONE':
-        return 'bg-green-100 text-green-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   const getProviderTypeBadgeColor = (type: 'PROFESSIONAL' | 'COMPANY') =>
     type === 'COMPANY'
       ? 'bg-emerald-100 text-emerald-800'
@@ -85,11 +73,11 @@ export default function RequestsPage() {
           className={inputClass}
         >
           <option value="">All Status</option>
-          <option value="PENDING">Pending</option>
-          <option value="ACCEPTED">Accepted</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="DONE">Done</option>
-          <option value="CANCELLED">Cancelled</option>
+          {REQUEST_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {getStatusLabel(status)}
+            </option>
+          ))}
         </select>
         <input
           type="text"
@@ -154,7 +142,7 @@ export default function RequestsPage() {
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(request.status)}`}
                         >
-                          {request.status}
+                          {getStatusLabel(request.status)}
                         </span>
                       </td>
                       <td className="px-6 py-4">

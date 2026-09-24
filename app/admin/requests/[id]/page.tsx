@@ -2,6 +2,7 @@
 
 import { use } from 'react'
 import { useRequest, useUpdateRequestStatus } from '@/hooks/use-requests'
+import AuthenticatedImage from '@/components/authenticated-image'
 import {
   PROVIDER_REQUIRED_STATUSES,
   REQUEST_STATUSES,
@@ -148,7 +149,7 @@ export default function RequestDetailPage({
               </h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 {request.photos.map((photo, index) => (
-                  <img
+                  <AuthenticatedImage
                     key={index}
                     src={photo}
                     alt={`Request photo ${index + 1}`}

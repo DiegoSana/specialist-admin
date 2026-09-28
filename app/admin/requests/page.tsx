@@ -117,11 +117,11 @@ export default function RequestsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className={thClass}>Status</th>
                   <th className={thClass}>Title</th>
                   <th className={thClass}>Client</th>
                   <th className={thClass}>Provider</th>
                   <th className={thClass}>Created</th>
+                  <th className={thClass}>Status</th>
                   <th className={thClass}>Actions</th>
                 </tr>
               </thead>
@@ -138,13 +138,6 @@ export default function RequestsPage() {
                 ) : (
                   data.data.map((request: Request) => (
                     <tr key={request.id} className="hover:bg-gray-50">
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(request.status)}`}
-                        >
-                          {getStatusLabel(request.status)}
-                        </span>
-                      </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">
                           {request.title}
@@ -183,6 +176,13 @@ export default function RequestsPage() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                         {new Date(request.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(request.status)}`}
+                        >
+                          {getStatusLabel(request.status)}
+                        </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm">
                         <Link

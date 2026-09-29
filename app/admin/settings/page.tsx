@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useEmailStatus } from '@/hooks/use-email-status'
+import { useWhatsAppConfig } from '@/hooks/use-whatsapp'
 
 function getProviderBadgeColor(provider: string) {
   switch (provider) {
@@ -10,6 +11,17 @@ function getProviderBadgeColor(provider: string) {
     case 'smtp':
     case 'mailgun':
       return 'bg-gray-100 text-gray-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+function getWhatsAppProviderBadgeColor(provider: string) {
+  switch (provider) {
+    case 'twilio':
+      return 'bg-green-100 text-green-800'
+    case 'local':
+      return 'bg-amber-100 text-amber-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
@@ -41,6 +53,11 @@ function CopyButton({ value }: { value: string }) {
 
 export default function SettingsPage() {
   const { data, isLoading, error } = useEmailStatus()
+  const {
+    data: whatsAppConfig,
+    isLoading: isWhatsAppLoading,
+    error: whatsAppError,
+  } = useWhatsAppConfig()
 
   if (isLoading) {
     return (
@@ -125,6 +142,70 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        )}
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-lg bg-white p-6 shadow">
+        <h2 className="text-lg font-semibold text-gray-900">WhatsApp delivery</h2>
+
+        {isWhatsAppLoading && (
+          <div className="mt-3 flex items-center justify-center py-6">
+            <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+          </div>
+        )}
+
+        {whatsAppError && (
+          <div className="mt-3 rounded-lg bg-red-50 p-4 text-red-800">
+            Error loading WhatsApp settings:{' '}
+            {whatsAppError instanceof Error ? whatsAppError.message : 'Unknown error'}
+          </div>
+        )}
+
+        {whatsAppConfig && (
+          <>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-sm text-gray-600">Active provider:</span>
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getWhatsAppProviderBadgeColor(whatsAppConfig.provider)}`}
+              >
+                {whatsAppConfig.provider}
+              </span>
+            </div>
+
+            {whatsAppConfig.provider === 'twilio' && whatsAppConfig.twilio && (
+              <div className="mt-6 border-t border-gray-200 pt-6">
+                <div>
+                  <span className="block text-xs font-medium uppercase tracking-wider text-gray-500">
+                    From number
+                  </span>
+                  <div className="mt-1 flex items-center gap-2">
+                    <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-800">
+                      {whatsAppConfig.twilio.fromNumber}
+                    </code>
+                    <CopyButton value={whatsAppConfig.twilio.fromNumber} />
+                  </div>
+                </div>
+
+                {whatsAppConfig.twilio.isDefaultSandboxNumber && (
+                  <p className="mt-4 text-sm text-gray-600">
+                    This is the default Twilio Sandbox number. Messages only reach numbers that
+                    joined the sandbox via <code className="font-mono">join &lt;code&gt;</code> in
+                    WhatsApp — real recipients need a production WhatsApp Business number instead.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {whatsAppConfig.provider === 'local' && (
+              <div className="mt-6 border-t border-gray-200 pt-6">
+                <p className="text-sm text-gray-600">
+                  Local/dev mode — no real WhatsApp messages are sent.
+                  {whatsAppConfig.devMode &&
+                    ' The admin dev tools (simulate reply, force-trigger follow-up) are available in this mode.'}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

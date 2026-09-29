@@ -296,18 +296,25 @@ export default function WhatsAppThreadPage({
               </p>
             )}
           </div>
+        </div>
+      )}
 
+      {(config?.availableFollowUpRules?.length ?? 0) > 0 && (
+        <div className="mt-6 space-y-6">
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">
-              Forzar seguimiento (dev mode)
+              Forzar seguimiento
             </h2>
+            <p className="mb-3 text-sm text-gray-500">
+              Si el proveedor activo no es de prueba, esto envía un WhatsApp real.
+            </p>
             <select
               value={selectedRule}
               onChange={(e) => setSelectedRule(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Seleccionar regla...</option>
-              {(config.availableFollowUpRules || []).map((rule) => (
+              {(config?.availableFollowUpRules ?? []).map((rule) => (
                 <option key={rule} value={rule}>
                   {rule}
                 </option>

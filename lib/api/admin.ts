@@ -258,7 +258,7 @@ export interface PaginatedResponse<T> {
 export interface AdminWhatsAppConfig {
   provider: 'twilio' | 'local'
   devMode: boolean
-  availableFollowUpRules?: string[]
+  availableFollowUpRules: string[]
   twilio?: {
     fromNumber: string
     isDefaultSandboxNumber: boolean

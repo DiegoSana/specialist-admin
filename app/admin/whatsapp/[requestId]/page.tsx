@@ -57,6 +57,77 @@ function formatTimestamp(iso: string | null) {
   return new Date(iso).toLocaleString()
 }
 
+function InteractionBubbles({ interaction }: { interaction: WhatsAppInteraction }) {
+  return (
+    <div className="space-y-2">
+      {interaction.messageContent && (
+        <div className="flex justify-start">
+          <div className="max-w-lg rounded-lg rounded-bl-none bg-gray-100 px-4 py-2">
+            <p className="whitespace-pre-wrap text-sm text-gray-900">
+              {interaction.messageContent}
+            </p>
+            <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 font-semibold ${getMessageStatusBadgeColor(interaction.status)}`}
+              >
+                {interaction.status}
+              </span>
+              <span>
+                {interaction.direction === 'TO_CLIENT' ? '→ cliente' : '→ proveedor'}
+              </span>
+              {formatTimestamp(interaction.sentAt) && (
+                <span>enviado {formatTimestamp(interaction.sentAt)}</span>
+              )}
+              {formatTimestamp(interaction.deliveredAt) && (
+                <span>entregado {formatTimestamp(interaction.deliveredAt)}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {interaction.responseContent && (
+        <div className="flex justify-end">
+          <div className="max-w-lg rounded-lg rounded-br-none bg-blue-600 px-4 py-2">
+            <p className="whitespace-pre-wrap text-sm text-white">
+              {interaction.responseContent}
+            </p>
+            <div className="mt-1 text-xs text-blue-100">
+              {formatTimestamp(interaction.respondedAt) &&
+                `respondido ${formatTimestamp(interaction.respondedAt)}`}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ConversationPanel({
+  title,
+  interactions,
+  emptyMessage = 'Sin mensajes',
+}: {
+  title: string
+  interactions: WhatsAppInteraction[]
+  emptyMessage?: string
+}) {
+  return (
+    <div className="rounded-lg bg-white p-6 shadow">
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">{title}</h2>
+      {interactions.length === 0 ? (
+        <p className="text-center text-sm text-gray-500">{emptyMessage}</p>
+      ) : (
+        <div className="space-y-4">
+          {interactions.map((interaction) => (
+            <InteractionBubbles key={interaction.id} interaction={interaction} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function getErrorMessage(error: unknown, fallback: string) {
   if (
     error &&
@@ -112,6 +183,22 @@ export default function WhatsAppThreadPage({
   // Interactions come back most-recent-first from the backend; render oldest-first
   // like a normal chat thread.
   const orderedThread = [...thread].reverse()
+  const clientThread = orderedThread.filter(
+    (interaction) => interaction.direction === 'TO_CLIENT',
+  )
+  const providerThread = orderedThread.filter(
+    (interaction) => interaction.direction === 'TO_PROVIDER',
+  )
+
+  const clientTitle = request?.client
+    ? `Cliente: ${request.client.firstName} ${request.client.lastName}`
+    : 'Cliente'
+  const providerTitle = request?.provider
+    ? `Proveedor: ${request.provider.name}`
+    : 'Proveedor'
+  const providerEmptyMessage = request?.provider
+    ? 'Sin mensajes'
+    : 'Sin proveedor asignado todavía'
 
   return (
     <div>
@@ -203,60 +290,13 @@ export default function WhatsAppThreadPage({
         </div>
       )}
 
-      <div className="rounded-lg bg-white p-6 shadow">
-        {orderedThread.length === 0 ? (
-          <p className="text-center text-gray-500">No messages yet</p>
-        ) : (
-          <div className="space-y-4">
-            {orderedThread.map((interaction: WhatsAppInteraction) => (
-              <div key={interaction.id} className="space-y-2">
-                {interaction.messageContent && (
-                  <div className="flex justify-start">
-                    <div className="max-w-lg rounded-lg rounded-bl-none bg-gray-100 px-4 py-2">
-                      <p className="whitespace-pre-wrap text-sm text-gray-900">
-                        {interaction.messageContent}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 font-semibold ${getMessageStatusBadgeColor(interaction.status)}`}
-                        >
-                          {interaction.status}
-                        </span>
-                        <span>
-                          {interaction.direction === 'TO_CLIENT'
-                            ? '→ cliente'
-                            : '→ proveedor'}
-                        </span>
-                        {formatTimestamp(interaction.sentAt) && (
-                          <span>enviado {formatTimestamp(interaction.sentAt)}</span>
-                        )}
-                        {formatTimestamp(interaction.deliveredAt) && (
-                          <span>
-                            entregado {formatTimestamp(interaction.deliveredAt)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {interaction.responseContent && (
-                  <div className="flex justify-end">
-                    <div className="max-w-lg rounded-lg rounded-br-none bg-blue-600 px-4 py-2">
-                      <p className="whitespace-pre-wrap text-sm text-white">
-                        {interaction.responseContent}
-                      </p>
-                      <div className="mt-1 text-xs text-blue-100">
-                        {formatTimestamp(interaction.respondedAt) &&
-                          `respondido ${formatTimestamp(interaction.respondedAt)}`}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ConversationPanel title={clientTitle} interactions={clientThread} />
+        <ConversationPanel
+          title={providerTitle}
+          interactions={providerThread}
+          emptyMessage={providerEmptyMessage}
+        />
       </div>
 
       {config?.devMode === true && (

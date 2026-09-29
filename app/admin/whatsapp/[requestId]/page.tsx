@@ -290,6 +290,30 @@ export default function WhatsAppThreadPage({
         </div>
       )}
 
+      <details className="mb-6 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+        <summary className="cursor-pointer font-medium">
+          Cómo se asignan las respuestas de WhatsApp
+        </summary>
+        <ul className="mt-3 list-disc space-y-2 pl-5">
+          <li>
+            Una respuesta entrante siempre se asigna al <strong>último mensaje</strong> mandado a
+            ese número de teléfono, sin importar de qué solicitud es (aunque el teléfono tenga
+            otra solicitud con un mensaje más viejo sin responder). Si ese último mensaje ya fue
+            respondido, o no hay ninguno pendiente, la respuesta va a Soporte en vez de asignarse a
+            esta solicitud.
+          </li>
+          <li>
+            Si el mismo teléfono tiene otra solicitud activa, no se le manda un follow-up nuevo
+            hasta que pase la ventana de espaciado configurada (
+            <code className="rounded bg-blue-100 px-1 py-0.5">
+              WHATSAPP_FOLLOWUP_PHONE_STAGGER_HOURS
+            </code>
+            , 24hs por defecto) desde el último mensaje mandado a ese número, sea de la solicitud
+            que sea — para que dos solicitudes no compitan por la misma respuesta.
+          </li>
+        </ul>
+      </details>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ConversationPanel title={clientTitle} interactions={clientThread} />
         <ConversationPanel

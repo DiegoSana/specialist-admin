@@ -6,6 +6,8 @@ interface AuthenticatedImageProps {
   src: string
   alt: string
   className?: string
+  onClick?: () => void
+  onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void
 }
 
 // Private storage URLs (specialist-be's /storage/private/*) require a bearer token, which a plain
@@ -13,7 +15,7 @@ interface AuthenticatedImageProps {
 // fetches the bytes with the admin token and renders them as a blob URL instead. Mirrors
 // specialist-fe's components/images/authenticated-image.tsx, adapted for this repo's admin_token
 // key and lack of a shared getAuthToken() helper.
-export default function AuthenticatedImage({ src, alt, className }: AuthenticatedImageProps) {
+export default function AuthenticatedImage({ src, alt, className, onClick, onError }: AuthenticatedImageProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
@@ -69,5 +71,5 @@ export default function AuthenticatedImage({ src, alt, className }: Authenticate
   }
 
   // eslint-disable-next-line @next/next/no-img-element -- blob: URL, next/image can't optimize it
-  return <img src={imageUrl} alt={alt} className={className} />
+  return <img src={imageUrl} alt={alt} className={className} onClick={onClick} onError={onError} />
 }

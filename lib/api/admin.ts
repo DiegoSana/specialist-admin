@@ -265,6 +265,11 @@ export interface AdminWhatsAppConfig {
   }
 }
 
+export interface AdminVerificationConfig {
+  provider: 'twilio' | 'local'
+  devCode?: string
+}
+
 export interface WhatsAppConversationSummary {
   requestId: string
   requestTitle: string
@@ -537,6 +542,12 @@ export const adminApi = {
       `/admin/whatsapp/conversations/${requestId}/trigger-followup`,
       { ruleName },
     )
+    return response.data
+  },
+
+  // Phone/email verification (OTP)
+  getVerificationConfig: async (): Promise<AdminVerificationConfig> => {
+    const response = await api.get<AdminVerificationConfig>('/admin/verification/config')
     return response.data
   },
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useEmailStatus } from '@/hooks/use-email-status'
 import { useWhatsAppConfig } from '@/hooks/use-whatsapp'
+import { useVerificationConfig } from '@/hooks/use-verification'
 
 function getProviderBadgeColor(provider: string) {
   switch (provider) {
@@ -17,6 +18,17 @@ function getProviderBadgeColor(provider: string) {
 }
 
 function getWhatsAppProviderBadgeColor(provider: string) {
+  switch (provider) {
+    case 'twilio':
+      return 'bg-green-100 text-green-800'
+    case 'local':
+      return 'bg-amber-100 text-amber-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+function getVerificationProviderBadgeColor(provider: string) {
   switch (provider) {
     case 'twilio':
       return 'bg-green-100 text-green-800'
@@ -58,6 +70,11 @@ export default function SettingsPage() {
     isLoading: isWhatsAppLoading,
     error: whatsAppError,
   } = useWhatsAppConfig()
+  const {
+    data: verificationConfig,
+    isLoading: isVerificationLoading,
+    error: verificationError,
+  } = useVerificationConfig()
 
   if (isLoading) {
     return (
@@ -203,6 +220,57 @@ export default function SettingsPage() {
                   {whatsAppConfig.devMode &&
                     ' The admin dev tools (simulate reply, force-trigger follow-up) are available in this mode.'}
                 </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-lg bg-white p-6 shadow">
+        <h2 className="text-lg font-semibold text-gray-900">Phone/email verification</h2>
+
+        {isVerificationLoading && (
+          <div className="mt-3 flex items-center justify-center py-6">
+            <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+          </div>
+        )}
+
+        {verificationError && (
+          <div className="mt-3 rounded-lg bg-red-50 p-4 text-red-800">
+            Error loading verification settings:{' '}
+            {verificationError instanceof Error ? verificationError.message : 'Unknown error'}
+          </div>
+        )}
+
+        {verificationConfig && (
+          <>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-sm text-gray-600">Active provider:</span>
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getVerificationProviderBadgeColor(verificationConfig.provider)}`}
+              >
+                {verificationConfig.provider}
+              </span>
+            </div>
+
+            {verificationConfig.provider === 'local' && verificationConfig.devCode && (
+              <div className="mt-6 border-t border-gray-200 pt-6">
+                <p className="text-sm text-gray-600">
+                  Local/dev mode — no real SMS/email is sent. Use the code below to confirm any
+                  phone/email verification.
+                </p>
+
+                <div className="mt-4">
+                  <span className="block text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Dev OTP code
+                  </span>
+                  <div className="mt-1 flex items-center gap-2">
+                    <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-800">
+                      {verificationConfig.devCode}
+                    </code>
+                    <CopyButton value={verificationConfig.devCode} />
+                  </div>
+                </div>
               </div>
             )}
           </>

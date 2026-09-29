@@ -1,8 +1,10 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState } from 'react'
 import { useRequest, useUpdateRequestStatus } from '@/hooks/use-requests'
 import AuthenticatedImage from '@/components/authenticated-image'
+import AuthenticatedVideo from '@/components/authenticated-video'
+import RequestPhotoViewer from '@/components/admin/request-photo-viewer'
 import {
   PROVIDER_REQUIRED_STATUSES,
   REQUEST_STATUSES,
@@ -12,6 +14,8 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, MessageSquare } from 'lucide-react'
 
+const VIDEO_EXTENSION_RE = /\.(mp4|webm|ogg|mov)$/i
+
 export default function RequestDetailPage({
   params,
 }: {
@@ -20,6 +24,8 @@ export default function RequestDetailPage({
   const { id } = use(params)
   const { data: request, isLoading, error } = useRequest(id)
   const updateStatusMutation = useUpdateRequestStatus()
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerIndex, setViewerIndex] = useState(0)
 
   const handleStatusChange = async (newStatus: string) => {
     const confirmMessage =
@@ -149,15 +155,45 @@ export default function RequestDetailPage({
               </h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 {request.photos.map((photo, index) => (
-                  <AuthenticatedImage
-                    key={index}
-                    src={photo}
-                    alt={`Request photo ${index + 1}`}
-                    className="h-32 w-full rounded-lg object-cover"
-                  />
+                  <div
+                    key={photo}
+                    className="aspect-square cursor-pointer overflow-hidden rounded-lg bg-gray-100"
+                    onClick={() => {
+                      setViewerIndex(index)
+                      setViewerOpen(true)
+                    }}
+                  >
+                    {VIDEO_EXTENSION_RE.test(photo) ? (
+                      <AuthenticatedVideo
+                        src={photo}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <AuthenticatedImage
+                        src={photo}
+                        alt={`Request photo ${index + 1}`}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
+          )}
+
+          {request.photos && request.photos.length > 0 && (
+            <RequestPhotoViewer
+              photos={request.photos}
+              index={viewerIndex}
+              open={viewerOpen}
+              onClose={() => setViewerOpen(false)}
+              onIndexChange={setViewerIndex}
+            />
           )}
         </div>
 

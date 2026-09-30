@@ -1,4 +1,12 @@
 import { api } from '@/lib/api'
+import type { Review, ReviewFeatureInput } from '@specialist/shared'
+
+// Re-exported so existing imports of `Review` from this module keep working. Unlike `User`
+// (see Gotchas in CLAUDE.md), `@specialist/shared`'s `Review` type was fixed in the
+// bidirectional reviews redesign (2026-09-30, shared commit 61e4891) to match the real backend
+// shape (direction, isFeatured, revealedAt, nullable professionalId) — it's the source of truth
+// here now instead of a hand-duplicated interface.
+export type { Review, ReviewFeatureInput }
 
 export interface DashboardStats {
   users: {
@@ -211,34 +219,6 @@ export interface Company {
   }
   createdAt: string
   updatedAt?: string
-}
-
-export interface Review {
-  id: string
-  reviewerId: string
-  professionalId: string
-  requestId: string | null
-  rating: number
-  comment: string | null
-  status: 'PENDING' | 'APPROVED' | 'REJECTED'
-  moderatedAt: string | null
-  moderatedBy: string | null
-  createdAt: string
-  updatedAt: string
-  reviewer?: {
-    id: string
-    firstName: string
-    lastName: string
-  }
-  professional?: {
-    id: string
-    userId: string
-    user?: {
-      id: string
-      firstName: string
-      lastName: string
-    }
-  }
 }
 
 export interface RequestFilters {
@@ -588,6 +568,11 @@ export const adminApi = {
 
   rejectReview: async (id: string): Promise<Review> => {
     const response = await api.post<Review>(`/reviews/${id}/reject`)
+    return response.data
+  },
+
+  featureReview: async (id: string, input: ReviewFeatureInput): Promise<Review> => {
+    const response = await api.post<Review>(`/reviews/${id}/feature`, input)
     return response.data
   },
 

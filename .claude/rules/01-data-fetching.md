@@ -27,3 +27,9 @@ paths:
   importing from `@specialist/shared` — this is deliberate (see root `CLAUDE.md` Gotchas re: the
   stale `User`/`UserRole` types in that package). Keep new admin-only response shapes local here
   too, unless/until `specialist-shared` is fixed.
+  - **Exception: `Review`** (2026-09-30 bidirectional reviews redesign). `specialist-shared`'s
+    `Review`/`ReviewFeatureInput` types (`src/types/review.ts`, shared commit `61e4891`) were
+    fixed to match the real backend shape (`direction`, `isFeatured`, `revealedAt`, nullable
+    `professionalId`), so `lib/api/admin.ts` now re-exports them from `@specialist/shared` instead
+    of hand-declaring a local `Review` interface. Don't use this as precedent for `User` — that
+    type is still stale in shared.

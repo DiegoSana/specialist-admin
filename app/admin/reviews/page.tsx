@@ -4,13 +4,21 @@ import {
   usePendingReviews,
   useApproveReview,
   useRejectReview,
+  useFeatureReview,
 } from '@/hooks/use-reviews'
 import { Review } from '@/lib/api/admin'
+import { ReviewDirection } from '@specialist/shared'
+
+const DIRECTION_LABELS: Record<ReviewDirection, string> = {
+  [ReviewDirection.CLIENT_TO_PROVIDER]: 'Cliente → Especialista',
+  [ReviewDirection.PROVIDER_TO_CLIENT]: 'Especialista → Cliente',
+}
 
 export default function ReviewsPage() {
   const { data: reviews, isLoading, error } = usePendingReviews()
   const approveMutation = useApproveReview()
   const rejectMutation = useRejectReview()
+  const featureMutation = useFeatureReview()
 
   const handleApprove = async (id: string) => {
     if (confirm('Approve this review?')) {
@@ -32,9 +40,21 @@ export default function ReviewsPage() {
     }
   }
 
+  const handleToggleFeature = async (review: Review) => {
+    try {
+      await featureMutation.mutateAsync({
+        id: review.id,
+        isFeatured: !review.isFeatured,
+      })
+    } catch (error) {
+      alert('Failed to update featured status')
+    }
+  }
+
   const isMutating = (id: string) =>
     (approveMutation.isPending && approveMutation.variables === id) ||
-    (rejectMutation.isPending && rejectMutation.variables === id)
+    (rejectMutation.isPending && rejectMutation.variables === id) ||
+    (featureMutation.isPending && featureMutation.variables?.id === id)
 
   if (isLoading) {
     return (
@@ -71,6 +91,9 @@ export default function ReviewsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Direction
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Reviewer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -93,6 +116,9 @@ export default function ReviewsPage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {reviews?.map((review: Review) => (
                 <tr key={review.id} className="hover:bg-gray-50">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {DIRECTION_LABELS[review.direction]}
+                  </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                     {review.reviewer
                       ? `${review.reviewer.firstName} ${review.reviewer.lastName}`
@@ -101,7 +127,7 @@ export default function ReviewsPage() {
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                     {review.professional?.user
                       ? `${review.professional.user.firstName} ${review.professional.user.lastName}`
-                      : review.professionalId}
+                      : review.professionalId || <span className="text-gray-400">—</span>}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {'★'.repeat(review.rating)}
@@ -131,6 +157,19 @@ export default function ReviewsPage() {
                       >
                         Reject
                       </button>
+                      {review.status === 'APPROVED' && (
+                        <button
+                          onClick={() => handleToggleFeature(review)}
+                          disabled={isMutating(review.id)}
+                          className={
+                            review.isFeatured
+                              ? 'text-amber-600 hover:text-amber-900 disabled:opacity-50'
+                              : 'text-gray-500 hover:text-gray-900 disabled:opacity-50'
+                          }
+                        >
+                          {review.isFeatured ? '★ Destacada' : '☆ Destacar'}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

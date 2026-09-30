@@ -1,4 +1,5 @@
 import { api } from '@/lib/api'
+import { ReviewStatus } from '@specialist/shared'
 import type { Review, ReviewFeatureInput } from '@specialist/shared'
 
 // Re-exported so existing imports of `Review` from this module keep working. Unlike `User`
@@ -7,6 +8,7 @@ import type { Review, ReviewFeatureInput } from '@specialist/shared'
 // shape (direction, isFeatured, revealedAt, nullable professionalId) — it's the source of truth
 // here now instead of a hand-duplicated interface.
 export type { Review, ReviewFeatureInput }
+export { ReviewStatus }
 
 export interface DashboardStats {
   users: {
@@ -556,8 +558,13 @@ export const adminApi = {
   },
 
   // Reviews (moderation) — lives under /reviews/admin/*, not /admin/*
-  getPendingReviews: async (): Promise<Review[]> => {
-    const response = await api.get<Review[]>('/reviews/admin/pending')
+  // `status` maps to the backend's `?status=PENDING|APPROVED|REJECTED` query param on
+  // GET /reviews/admin/pending (defaults to PENDING server-side, same as omitting it here).
+  getPendingReviews: async (status?: ReviewStatus): Promise<Review[]> => {
+    const url = status
+      ? `/reviews/admin/pending?status=${status}`
+      : '/reviews/admin/pending'
+    const response = await api.get<Review[]>(url)
     return response.data
   },
 

@@ -1,12 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import {
   usePendingReviews,
   useApproveReview,
   useRejectReview,
   useFeatureReview,
 } from '@/hooks/use-reviews'
-import { Review } from '@/lib/api/admin'
+import { Review, ReviewStatus } from '@/lib/api/admin'
 import { ReviewDirection } from '@specialist/shared'
 
 const DIRECTION_LABELS: Record<ReviewDirection, string> = {
@@ -14,8 +15,23 @@ const DIRECTION_LABELS: Record<ReviewDirection, string> = {
   [ReviewDirection.PROVIDER_TO_CLIENT]: 'Especialista → Cliente',
 }
 
+const STATUS_TABS: { status: ReviewStatus; label: string }[] = [
+  { status: ReviewStatus.PENDING, label: 'Pendientes' },
+  { status: ReviewStatus.APPROVED, label: 'Aprobadas' },
+  { status: ReviewStatus.REJECTED, label: 'Rechazadas' },
+]
+
+const STATUS_EMPTY_LABEL: Record<ReviewStatus, string> = {
+  [ReviewStatus.PENDING]: 'No pending reviews.',
+  [ReviewStatus.APPROVED]: 'No approved reviews.',
+  [ReviewStatus.REJECTED]: 'No rejected reviews.',
+}
+
 export default function ReviewsPage() {
-  const { data: reviews, isLoading, error } = usePendingReviews()
+  const [statusFilter, setStatusFilter] = useState<ReviewStatus>(
+    ReviewStatus.PENDING,
+  )
+  const { data: reviews, isLoading, error } = usePendingReviews(statusFilter)
   const approveMutation = useApproveReview()
   const rejectMutation = useRejectReview()
   const featureMutation = useFeatureReview()
@@ -77,13 +93,29 @@ export default function ReviewsPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Reviews</h1>
         <div className="text-sm text-gray-600">
-          {reviews?.length ?? 0} pending review{reviews?.length === 1 ? '' : 's'}
+          {reviews?.length ?? 0} review{reviews?.length === 1 ? '' : 's'}
         </div>
+      </div>
+
+      <div className="mb-4 flex gap-2 border-b border-gray-200">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.status}
+            onClick={() => setStatusFilter(tab.status)}
+            className={
+              statusFilter === tab.status
+                ? 'border-b-2 border-blue-600 px-3 py-2 text-sm font-medium text-blue-600'
+                : 'border-b-2 border-transparent px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700'
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {reviews && reviews.length === 0 ? (
         <div className="rounded-lg bg-white p-8 text-center text-gray-500 shadow">
-          No pending reviews.
+          {STATUS_EMPTY_LABEL[statusFilter]}
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg bg-white shadow">
@@ -143,20 +175,24 @@ export default function ReviewsPage() {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm">
                     <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => handleApprove(review.id)}
-                        disabled={isMutating(review.id)}
-                        className="text-green-600 hover:text-green-900 disabled:opacity-50"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleReject(review.id)}
-                        disabled={isMutating(review.id)}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                      >
-                        Reject
-                      </button>
+                      {review.status === 'PENDING' && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(review.id)}
+                            disabled={isMutating(review.id)}
+                            className="text-green-600 hover:text-green-900 disabled:opacity-50"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(review.id)}
+                            disabled={isMutating(review.id)}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
                       {review.status === 'APPROVED' && (
                         <button
                           onClick={() => handleToggleFeature(review)}
@@ -169,6 +205,9 @@ export default function ReviewsPage() {
                         >
                           {review.isFeatured ? '★ Destacada' : '☆ Destacar'}
                         </button>
+                      )}
+                      {review.status === 'REJECTED' && (
+                        <span className="text-gray-400">—</span>
                       )}
                     </div>
                   </td>
